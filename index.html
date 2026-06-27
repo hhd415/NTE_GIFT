@@ -518,9 +518,9 @@
                     font-size: 14px;
                 }
 
-            /* ===== 隐藏“推荐值”列（第7列） ===== */
-            thead tr.labels th:nth-child(7),
-            tbody td:nth-child(7) {
+            /* ===== 隐藏”推荐值”列 ===== */
+            thead tr.labels th.col-choice,
+            tbody td.col-choice {
                 display: none !important;
             }
 
@@ -767,9 +767,9 @@
                         <th class="raw-col">400</th>
                         <th class="raw-col">用200礼物减少</th>
                         <th class="raw-col">用400礼物减少</th>
-                        <th>推荐值</th>
-                        <th>礼物名</th>
+                        <th class="col-choice">推荐值</th>
                         <th>地点</th>
+                        <th>礼物名</th>
                         <th>总礼物</th>
                         <th>总方斯</th>
                     </tr>
@@ -1206,13 +1206,22 @@
                 return pa.name.localeCompare(pb.name, undefined, { sensitivity: 'base' });
             });
 
-            // 渲染表格
+            // 渲染表格（含地点合并）
             tbody.innerHTML = "";
             let totalGift = 0;
             let totalCost = 0;
             let count = selected.length;
 
-            selected.forEach(r => {
+            // 预计算地点 rowspan：相同地点连续出现时合并
+            const rowspans = new Array(selected.length).fill(1);
+            for (let i = selected.length - 2; i >= 0; i--) {
+                if (selected[i].location === selected[i + 1].location) {
+                    rowspans[i] = rowspans[i + 1] + 1;
+                    rowspans[i + 1] = 0; // 后续行不渲染地点
+                }
+            }
+
+            selected.forEach((r, idx) => {
                 totalGift += r.gift;
                 totalCost += r.cost;
 
@@ -1228,6 +1237,11 @@
                 // 礼物名显示：移动端将 "-" 及其后面部分拆到下一行
                 const giftNameDisplay = splitGiftName(r.giftName, isMobile);
 
+                const rowspan = rowspans[idx];
+                const locationCell = rowspan > 0
+                    ? `<td class="col-location" rowspan="${rowspan}">${locationDisplay}</td>`
+                    : '';
+
                 tbody.innerHTML += `
                                     <tr>
                                         <td class="col-role">${r.name}</td>
@@ -1237,8 +1251,8 @@
                                         <td class="raw-col">${r.e200}</td>
                                         <td class="raw-col">${r.e400}</td>
                                         <td class="col-choice">${r.choice}</td>
+                                        ${locationCell}
                                         <td class="col-giftname">${giftNameDisplay}</td>
-                                        <td class="col-location">${locationDisplay}</td>
                                         <td class="col-gift">${r.gift}</td>
                                         <td class="col-cost">${formatNumber(r.cost)}</td>
                                     </tr>`;
