@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>礼物方斯策略系统</title>
+
+    <style>
+        /* ===== 全局重置 & 字体 ===== */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f8;
+            padding: 28px 32px;
+            color: #1a1f2e;
+            margin: 0;
+            min-height: 100vh;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* ===== 卡片 ===== */
+        .card {
+            background: #ffffff;
+            padding: 26px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            transition: box-shadow 0.2s;
+        }
+
+            .card:hover {
+                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+            }
+
+            .card h2,
+            .card h3 {
+                margin: 0 0 14px 0;
+                font-weight: 500;
+                font-size: 19px;
+                color: #1a2744;
+                letter-spacing: -0.01em;
+            }
+
+            .card h2 {
+                font-size: 21px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+                .card h2 .slider-value {
+                    background: #eef2f7;
+                    padding: 4px 20px;
+                    border-radius: 40px;
+                    font-weight: 500;
+                    color: #1a3a6a;
+                    font-size: 24px;
+                }
+
+        /* ===== 控制行 ===== */
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 28px 48px;
+            margin-bottom: 18px;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            flex: 1 1 440px;
+        }
+
+            .slider-group label {
+                font-weight: 400;
+                color: #2a3a5a;
+                white-space: nowrap;
+                font-size: 17px;
+            }
+
+        .slider {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #d0d8e8, #2a4a7a);
+            border-radius: 4px;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #1a3a6a;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(26, 58, 106, 0.3);
+                transition: transform 0.15s, box-shadow 0.15s;
+            }
+
+                .slider::-webkit-slider-thumb:hover {
+                    transform: scale(1.12);
+                    box-shadow: 0 4px 14px rgba(26, 58, 106, 0.4);
+                }
+
+            .slider::-moz-range-thumb {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #1a3a6a;
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 2px 8px rgba(26, 58, 106, 0.3);
+            }
+
+        /* ===== Toggle 开关（折叠） ===== */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f0f4fd;
+            padding: 8px 20px 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #dfe6f0;
+            transition: background 0.2s, border-color 0.2s;
+            user-select: none;
+        }
+
+            .toggle-group:hover {
+                background: #e8edf8;
+                border-color: #c8d2e4;
+            }
+
+        .toggle-switch {
+            position: relative;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                position: absolute;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #b8c4d8;
+            border-radius: 40px;
+            transition: background 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+            .toggle-slider::before {
+                content: "";
+                position: absolute;
+                height: 20px;
+                width: 20px;
+                left: 3px;
+                bottom: 3px;
+                background: white;
+                border-radius: 50%;
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: #1a3a6a;
+        }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(20px);
+                box-shadow: 0 2px 6px rgba(26, 58, 106, 0.3);
+            }
+
+        .toggle-label {
+            font-weight: 400;
+            font-size: 17px;
+            color: #1a2a4a;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+            .toggle-label .badge {
+                background: #dce4f0;
+                padding: 2px 12px;
+                border-radius: 30px;
+                font-size: 13px;
+                font-weight: 400;
+                color: #2a4a7a;
+                margin-left: 6px;
+            }
+
+
+        /* ===== 汇总信息 ===== */
+        .summary {
+            font-weight: 400;
+            font-size: 17px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 32px;
+            padding: 12px 0 2px 0;
+            border-top: 1px solid #e8ecf4;
+            margin-top: 6px;
+        }
+
+            .summary span {
+                background: #f4f7fc;
+                padding: 6px 20px;
+                border-radius: 40px;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                color: #1a2a4a;
+                font-size: 16px;
+                border: 1px solid #e0e6f0;
+                font-weight: 400;
+            }
+
+                .summary span.total-cost {
+                    background: #f4f7fc;
+                    border-color: #e0e6f0;
+                    color: #1a2a4a;
+                }
+
+        /* ===== 角色选择 ===== */
+        .roles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            margin-top: 6px;
+        }
+
+        .role {
+            background: #f0f4fd;
+            padding: 6px 16px 6px 10px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 400;
+            color: #1a2a4a;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s, transform 0.1s;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .role:hover {
+                background: #e4ebf8;
+                transform: translateY(-1px);
+            }
+
+            .role input {
+                margin: 0;
+                accent-color: #1a3a6a;
+                width: 16px;
+                height: 16px;
+                cursor: pointer;
+            }
+
+            .role .skin-badge {
+                background: #1a3a6a;
+                color: white;
+                font-size: 10px;
+                padding: 1px 8px;
+                border-radius: 20px;
+                font-weight: 500;
+                margin-left: 2px;
+            }
+
+        /* ===== 表格容器 ===== */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.04);
+            background: white;
+            border: 1px solid #e8ecf4;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== 表格 ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            min-width: 1150px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            line-height: 1.7;
+        }
+
+        /* ---------- 表头 ---------- */
+        thead tr.group th {
+            background: #eef2f8;
+            color: #1a2a4a;
+            padding: 14px 12px;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            text-align: center;
+            border-right: 1px solid #d6deec;
+            border-bottom: 2px solid #c8d2e4;
+        }
+
+            thead tr.group th:last-child {
+                border-right: none;
+            }
+
+            thead tr.group th:first-child {
+                border-left: none;
+            }
+
+        /* 标签行 */
+        thead tr.labels th {
+            background: #dce4f0;
+            color: #1a2a4a;
+            padding: 12px 10px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            border-right: 1px solid #c8d2e4;
+            border-bottom: 2px solid #b0bed8;
+            white-space: nowrap;
+            letter-spacing: 0.1px;
+        }
+
+            thead tr.labels th:last-child {
+                border-right: none;
+            }
+
+            thead tr.labels th.raw-col {
+                background: #e4eaf5;
+            }
+
+        /* ---------- 表体 ---------- */
+        tbody td {
+            border-bottom: 1px solid #eef2f8;
+            padding: 12px 10px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 15px;
+            background: white;
+            transition: background 0.12s;
+            font-weight: 400;
+        }
+
+        tbody tr:hover td {
+            background: #f6faff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 列样式 */
+        .col-role {
+            font-weight: 500;
+            color: #0f1f3a;
+            white-space: nowrap;
+            font-size: 16px;
+        }
+
+        .col-giftname {
+            font-size: 14px;
+            color: #1f3a6a;
+            white-space: nowrap;
+            font-weight: 400;
+            width: var(--giftname-width);
+            min-width: var(--giftname-width);
+            max-width: var(--giftname-width);
+        }
+
+        .col-location {
+            font-size: 15px;
+            color: #4a5e7a;
+            white-space: nowrap;
+            font-weight: 400;
+        }
+
+        .col-choice {
+            font-weight: 500;
+            color: #1a3a6a;
+            font-size: 16px;
+        }
+
+        .col-gift,
+        .col-cost {
+            font-weight: 500;
+            color: #0f3b6a;
+        }
+
+        .col-cost {
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.2px;
+        }
+
+        /* ===== 折叠隐藏 ===== */
+        .raw-col.hidden-raw {
+            display: none !important;
+        }
+
+        thead tr.group th.raw-group-header.hidden-raw {
+            display: none !important;
+        }
+
+        /* ============================================================
+           移动端适配（纵向堆叠 + 隐藏推荐值列 + 地点两行 + 礼物名拆分）
+           ============================================================ */
+        @media (max-width: 700px) {
+            body {
+                padding: 16px 18px;
+                font-size: 16px;
+            }
+
+            .card {
+                padding: 18px 18px;
+                margin-bottom: 18px;
+            }
+
+            /* 纵向堆叠控制行 */
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+
+            .slider-group {
+                flex: 1 1 auto;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+                .slider-group label {
+                    white-space: normal;
+                    font-size: 16px;
+                    text-align: center;
+                }
+
+            .slider {
+                min-width: unset;
+                width: 100%;
+                height: 8px;
+            }
+
+                .slider::-webkit-slider-thumb {
+                    width: 26px;
+                    height: 26px;
+                }
+
+                .slider::-moz-range-thumb {
+                    width: 26px;
+                    height: 26px;
+                }
+
+            .toggle-group {
+                align-self: center;
+                padding: 8px 18px 8px 12px;
+            }
+
+            .toggle-switch {
+                width: 50px;
+                height: 28px;
+            }
+
+            .toggle-slider::before {
+                height: 22px;
+                width: 22px;
+                left: 3px;
+                bottom: 3px;
+            }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(22px);
+            }
+
+            .toggle-label {
+                font-size: 16px;
+            }
+
+
+
+            /* 汇总缩紧 */
+            .summary {
+                font-size: 15px;
+                gap: 10px 18px;
+            }
+
+                .summary span {
+                    padding: 4px 14px;
+                    font-size: 14px;
+                }
+
+            /* ===== 隐藏“推荐值”列（第7列） ===== */
+            thead tr.labels th:nth-child(7),
+            tbody td:nth-child(7) {
+                display: none !important;
+            }
+
+            /* 表格更紧凑 */
+            table {
+                font-size: 13px;
+                min-width: 700px;
+            }
+
+            thead tr.labels th {
+                font-size: 12px;
+                padding: 8px 4px;
+            }
+
+            tbody td {
+                padding: 8px 0px;
+                font-size: 13px;
+            }
+
+            .col-role {
+                font-size: 14px;
+            }
+
+            /* 礼物名列：根据最长礼物名/2 固定宽度，允许换行 */
+            .col-giftname {
+                font-size: 12px;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.4;
+                width: var(--giftname-width-mobile);
+                min-width: var(--giftname-width-mobile);
+                max-width: var(--giftname-width-mobile);
+            }
+
+            .col-location {
+                font-size: 13px;
+                white-space: normal;
+                word-break: break-word;
+                max-width: 80px;
+                line-height: 1.4;
+            }
+
+            .col-choice {
+                display: none !important;
+            }
+
+            .col-gift,
+            .col-cost {
+                font-size: 13px;
+            }
+
+            .card h2 {
+                font-size: 18px;
+            }
+
+                .card h2 .slider-value {
+                    font-size: 20px;
+                }
+
+            .role {
+                font-size: 14px;
+                padding: 4px 12px 4px 8px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 12px 12px;
+                font-size: 15px;
+            }
+
+            .card {
+                padding: 14px 14px;
+            }
+
+                .card h2 {
+                    font-size: 16px;
+                }
+
+                    .card h2 .slider-value {
+                        font-size: 17px;
+                        padding: 2px 14px;
+                    }
+
+            .slider-group label {
+                font-size: 15px;
+            }
+
+            .toggle-label {
+                font-size: 15px;
+            }
+
+            .summary {
+                font-size: 13px;
+                gap: 8px 12px;
+            }
+
+                .summary span {
+                    padding: 4px 10px;
+                    font-size: 12px;
+                }
+
+            table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+
+            thead tr.labels th {
+                font-size: 11px;
+                padding: 6px 3px;
+            }
+
+            tbody td {
+                padding: 6px 3px;
+                font-size: 12px;
+            }
+
+            .col-role {
+                font-size: 13px;
+            }
+
+            .col-giftname {
+                font-size: 11px;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.4;
+                width: var(--giftname-width-mobile);
+                min-width: var(--giftname-width-mobile);
+                max-width: var(--giftname-width-mobile);
+            }
+
+            .col-location {
+                font-size: 12px;
+                max-width: 65px;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.4;
+            }
+
+            .col-gift,
+            .col-cost {
+                font-size: 12px;
+            }
+
+            .role {
+                font-size: 13px;
+                padding: 4px 10px 4px 6px;
+            }
+
+                .role input {
+                    width: 14px;
+                    height: 14px;
+                }
+        }
+
+        /* ===== 平滑过渡 ===== */
+        .raw-col {
+            transition: display 0.2s ease;
+        }
+
+        .table-wrap::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-wrap::-webkit-scrollbar-track {
+            background: #eef2f8;
+            border-radius: 4px;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: #c8d2e4;
+            border-radius: 4px;
+        }
+
+            .table-wrap::-webkit-scrollbar-thumb:hover {
+                background: #a8b6d0;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- ===== 控制卡（含汇总） ===== -->
+        <div class="card">
+            <div class="controls-row">
+
+                <!-- 滑块 -->
+                <div class="slider-group">
+                    <label for="slider">我愿意用 <strong id="value" class="slider-value">4 300</strong> 方斯减少 1 个礼物</label>
+                    <input type="range"
+                           min="0"
+                           max="7000"
+                           value="4300"
+                           step="100"
+                           id="slider"
+                           class="slider">
+                </div>
+
+                <!-- 折叠开关 -->
+                <div class="toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleRaw">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label" id="toggleLabel">
+                        原始数据
+                        <span class="badge" id="toggleBadge">折叠</span>
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- 汇总信息 -->
+            <div class="summary" id="summary"></div>
+        </div>
+
+        <!-- ===== 角色筛选卡 ===== -->
+        <div class="card">
+            <h3>角色筛选
+                <span class="role" id="btnSkinSelect">
+                    🎯 仅选择有皮肤的角色
+                    <span class="skin-badge" id="skinBadge">0</span>
+                </span>
+            </h3>
+            <div class="roles" id="roles"></div>
+        </div>
+
+        <!-- ===== 表格 ===== -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr class="group">
+                        <th colspan="1">名字</th>
+                        <th colspan="5" class="raw-group-header">原始数据及计算</th>
+                        <th colspan="3">推荐</th>
+                        <th colspan="2">结果</th>
+                    </tr>
+                    <tr class="labels">
+                        <th>角色</th>
+                        <th class="raw-col">100</th>
+                        <th class="raw-col">200</th>
+                        <th class="raw-col">400</th>
+                        <th class="raw-col">用200礼物减少</th>
+                        <th class="raw-col">用400礼物减少</th>
+                        <th>推荐值</th>
+                        <th>礼物名</th>
+                        <th>地点</th>
+                        <th>总礼物</th>
+                        <th>总方斯</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        /* ============================================================
+           1. 数据层（含 hasSkin）
+           ============================================================ */
+        const data = [{
+            name: "哈索尔",
+            name100: "缤纷轻食沙拉",
+            c100: 450,
+            l100: "食为天家庭餐厅(桥间地)",
+            name200: "斑斓梦",
+            c200: 5000,
+            l200: "Oops!Chest礼品店(桥间地)",
+            name400: "轨道之心",
+            c400: 20000,
+            l400: "布朗电器店(米格尔区)",
+            hasSkin: false
+        }, {
+            name: "达芙蒂尔",
+            name100: "猫猫惬意鱼治摸茶",
+            c100: 450,
+            l100: "抽风猫奶茶铺(桥间地)",
+            name200: "永恒的洁白",
+            c200: 5400,
+            l200: "集山忘野花店(绘空町)",
+            name400: "约定",
+            c400: 10000,
+            l400: "Oops!Chest礼品店(桥间地)",
+            hasSkin: false
+        }, {
+            name: "小吱",
+            name100: "猫猫猛锤荔蒲芋头布丁奶茶",
+            c100: 450,
+            l100: "抽风猫奶茶铺(桥间地)",
+            name200: "幻想曲",
+            c200: 3000,
+            l200: "集山忘野花店(桥间地)",
+            name400: "跳跳兔盒",
+            c400: 20000,
+            l400: "布朗电器店(桥间地)",
+            hasSkin: true
+        }, {
+            name: "法帝娅",
+            name100: "经典三重奏",
+            c100: 660,
+            l100: "玛雷尼披萨餐厅(桥间地)",
+            name200: "恒",
+            c200: 7500,
+            l200: "Oops!Chest礼品店(绘空町)",
+            name400: "冷冷琉光",
+            c400: 5400,
+            l400: "集山忘野花店(桥间地)",
+            hasSkin: true
+        }, {
+            name: "薄荷",
+            name100: "咕比脆",
+            c100: 300,
+            l100: "2-Four便利店(米格尔区)",
+            name200: "圆舞曲",
+            c200: 3000,
+            l200: "集山忘野花店(桥间地)",
+            name400: "浅绯祈-月影流光",
+            c400: 18000,
+            l400: "DSD潮玩店(绘空町)",
+            hasSkin: true
+        }, {
+            name: "翳",
+            name100: "鲍勃茶园",
+            c100: 300,
+            l100: "2-Four便利店(米格尔区)",
+            name200: "放空咻",
+            c200: 4000,
+            l200: "白鲸书店(桥间地)",
+            name400: "白玉盏",
+            c400: 20000,
+            l400: "布朗电器店(米格尔区)",
+            hasSkin: false
+        }, {
+            name: "埃德嘉",
+            name100: "咔叽玛薯霸",
+            c100: 300,
+            l100: "咔叽玛快餐店(桥间地)",
+            name200: "老大的肯定",
+            c200: 4000,
+            l200: "白鲸书店(桥间地)",
+            name400: "几何夜",
+            c400: 10000,
+            l400: "Oops!Chest礼品店(绘空町)",
+            hasSkin: false
+        }, {
+            name: "阿德勒",
+            name100: "净化守护含片",
+            c100: 420,
+            l100: "竹本清源药妆店(桥间地)",
+            name200: "金环青影",
+            c200: 3600,
+            l200: "集山忘野花店(桥间地)",
+            name400: "约定",
+            c400: 10000,
+            l400: "Oops!Chest礼品店(桥间地)",
+            hasSkin: false
+        }, {
+            name: "安魂曲",
+            name100: "番茄百分百",
+            c100: 300,
+            l100: "番茄百分百专卖售货机(桥间地)",
+            name200: "放空咻",
+            c200: 4000,
+            l200: "白鲸书店(桥间地)",
+            name400: "跳跳兔盒",
+            c400: 20000,
+            l400: "布朗电器店(桥间地)",
+            hasSkin: false
+        }, {
+            name: "浔",
+            name100: "千代家自酿生啤",
+            c100: 300,
+            l100: "卜多力居酒屋(桥间地)",
+            name200: "黄釉雅器",
+            c200: 3600,
+            l200: "集山忘野花店(桥间地)",
+            name400: "金月",
+            c400: 15000,
+            l400: "布朗电器店(绘空町)",
+            hasSkin: true
+        }, {
+            name: "娜娜莉",
+            name100: "酷辣辣辣条",
+            c100: 300,
+            l100: "2-Four便利店(新赫兰德区)",
+            name200: "灼眼的绯红",
+            c200: 5400,
+            l200: "集山忘野花店(绘空町)",
+            name400: "心猎铁骑L1-静待胜机",
+            c400: 14400,
+            l400: "DSD潮玩店(桥间地)",
+            hasSkin: true
+        }, {
+            name: "九原",
+            name100: "魔法膨胀全麦面包",
+            c100: 360,
+            l100: "2-Four便利店(桥间地)",
+            name200: "月白瓷瓶",
+            c200: 3000,
+            l200: "集山忘野花店(桥间地)",
+            name400: "轨道之心",
+            c400: 20000,
+            l400: "布朗电器店(米格尔区)",
+            hasSkin: true
+        }, {
+            name: "早雾",
+            name100: "再来一口!「牛奶味」",
+            c100: 360,
+            l100: "2-Four便利店(桥间地)",
+            name200: "斑斓梦",
+            c200: 5000,
+            l200: "Oops!Chest礼品店(桥间地)",
+            name400: "跳跳兔盒",
+            c400: 20000,
+            l400: "布朗电器店(桥间地)",
+            hasSkin: false
+        }, {
+            name: "白藏",
+            name100: "元气儿童套餐",
+            c100: 450,
+            l100: "食为天家庭餐厅(桥间地)",
+            name200: "灿烂之约",
+            c200: 4500,
+            l200: "集山忘野花店(绘空町)",
+            name400: "暴走棉绒绒-强者之证",
+            c400: 12000,
+            l400: "DSD潮玩店(桥间地)",
+            hasSkin: false
+        }, {
+            name: "哈尼娅",
+            name100: "酷辣辣辣条",
+            c100: 300,
+            l100: "2-Four便利店(新赫兰德区)",
+            name200: "幻想曲",
+            c200: 3000,
+            l200: "集山忘野花店(桥间地)",
+            name400: "浅绯祈-绯红之名",
+            c400: 18000,
+            l400: "DSD潮玩店(绘空町)",
+            hasSkin: false
+        }, {
+            name: "海月",
+            name100: "巨嘴奶黄包",
+            c100: 300,
+            l100: "巨嘴包子店(桥间地)",
+            name200: "幻想曲",
+            c200: 3000,
+            l200: "集山忘野花店(桥间地)",
+            name400: "约定",
+            c400: 10000,
+            l400: "Oops!Chest礼品店(桥间地)",
+            hasSkin: false
+        }];
+
+        /* ============================================================
+           2. 建模 + 校验
+           ============================================================ */
+        function buildModel(raw) {
+            return raw.map(r => {
+                const ok =
+                    Number.isFinite(r.c100) &&
+                    Number.isFinite(r.c200) &&
+                    Number.isFinite(r.c400) &&
+                    r.c100 > 0 && r.c200 > 0 && r.c400 > 0;
+                if (!ok) {
+                    console.warn("非法数据：", r);
+                    return null;
+                }
+                return {
+                    ...r,
+                    e200: Math.ceil(r.c200 - 2 * r.c100),
+                    e400: Math.ceil((r.c400 - 4 * r.c100) / 3)
+                };
+            }).filter(Boolean);
+        }
+
+        const model = buildModel(data);
+
+        /* ============================================================
+           3. 测量最长礼物名 & 设置列宽（CSS 变量）
+           ============================================================ */
+        function measureGiftNameColumn() {
+            const isMobile = window.innerWidth < 700;
+            // 收集所有可能的礼物名
+            const allNames = [];
+            model.forEach(r => {
+                allNames.push(r.name100, r.name200, r.name400);
+            });
+
+            // 创建隐藏测量元素（使用与 .col-giftname 相同的字体）
+            const measurer = document.createElement('span');
+            measurer.style.position = 'absolute';
+            measurer.style.visibility = 'hidden';
+            measurer.style.whiteSpace = 'nowrap';
+            measurer.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+            measurer.style.fontSize = isMobile ? '12px' : '14px';
+            document.body.appendChild(measurer);
+
+            let maxWidth = 0;
+            allNames.forEach(name => {
+                if (!name) return;
+                if (isMobile && name.includes('-')) {
+                    // 移动端考虑 splitGiftName 拆分后的最宽片段
+                    const idx = name.indexOf('-');
+                    measurer.textContent = name.substring(0, idx);
+                    maxWidth = Math.max(maxWidth, measurer.offsetWidth);
+                    measurer.textContent = name.substring(idx);
+                    maxWidth = Math.max(maxWidth, measurer.offsetWidth);
+                } else {
+                    measurer.textContent = name;
+                    maxWidth = Math.max(maxWidth, measurer.offsetWidth);
+                }
+            });
+
+            document.body.removeChild(measurer);
+
+            // 加上 td padding 余量（左右共约 20px）
+            const pcWidth = maxWidth + 24;
+            // 移动端：最长名一半宽度 + 少量余量，让内容均分换行
+            const mobileWidth = Math.ceil(maxWidth * 0.55);
+
+            document.documentElement.style.setProperty('--giftname-width', pcWidth + 'px');
+            document.documentElement.style.setProperty('--giftname-width-mobile', mobileWidth + 'px');
+        }
+
+        measureGiftNameColumn();
+
+        /* ============================================================
+           4. UI 引用
+           ============================================================ */
+        const slider = document.getElementById("slider");
+        const valueSpan = document.getElementById("value");
+        const tbody = document.getElementById("tbody");
+        const summary = document.getElementById("summary");
+        const rolesDiv = document.getElementById("roles");
+        const toggleRaw = document.getElementById("toggleRaw");
+        const toggleLabel = document.getElementById("toggleLabel");
+        const toggleBadge = document.getElementById("toggleBadge");
+        const btnSkinSelect = document.getElementById("btnSkinSelect");
+        const skinBadge = document.getElementById("skinBadge");
+
+        /* ============================================================
+           4. 工具函数
+           ============================================================ */
+        function formatNumber(num) {
+            return Math.round(num)
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+        }
+
+        function choose(r, T) {
+            if (r.e400 <= T) return 400;
+            if (r.e200 <= T) return 200;
+            return 100;
+        }
+
+        function getPrice(r, t) {
+            return t === 100 ? r.c100 : t === 200 ? r.c200 : r.c400;
+        }
+
+        function getGiftName(r, t) {
+            return t === 100 ? r.name100 : t === 200 ? r.name200 : r.name400;
+        }
+
+        function getLocation(r, t) {
+            return t === 100 ? r.l100 : t === 200 ? r.l200 : r.l400;
+        }
+
+        // 拆分地点为店名和区域（用于移动端两行显示）
+        function splitLocation(loc) {
+            const match = loc.match(/^(.*?)\(([^)]+)\)$/);
+            if (match) {
+                return { name: match[1].trim(), area: `(${match[2].trim()})` };
+            }
+            return { name: loc, area: '' };
+        }
+
+        // 拆分礼物名：将 "-" 及其后面的部分放到下一行（仅移动端）
+        function splitGiftName(name, isMobile) {
+            if (!isMobile || !name || !name.includes('-')) return name;
+            const idx = name.indexOf('-');
+            const before = name.substring(0, idx);
+            const after = name.substring(idx); // 包含 "-"
+            return `${before}<br>${after}`;
+        }
+
+        /* ============================================================
+           5. 初始化角色复选框
+           ============================================================ */
+        let skinCount = 0;
+        model.forEach((r, i) => {
+            if (r.hasSkin) skinCount++;
+            const skinLabel = r.hasSkin ? ' <span class="skin-badge">皮肤</span>' : '';
+            rolesDiv.innerHTML += `
+                                <label class="role">
+                                    <input type="checkbox" id="r${i}" checked>
+                                    ${r.name}${skinLabel}
+                                </label>`;
+        });
+        skinBadge.textContent = skinCount;
+
+        /* ============================================================
+           6. 折叠控制
+           ============================================================ */
+        function applyFoldState(hidden) {
+            const rawElements = document.querySelectorAll('.raw-col, .raw-group-header');
+            rawElements.forEach(el => {
+                if (hidden) {
+                    el.classList.add('hidden-raw');
+                } else {
+                    el.classList.remove('hidden-raw');
+                }
+            });
+            if (hidden) {
+                toggleBadge.textContent = '折叠';
+                toggleLabel.innerHTML = '原始数据 <span class="badge" id="toggleBadge">折叠</span>';
+            } else {
+                toggleBadge.textContent = '展开';
+                toggleLabel.innerHTML = '原始数据 <span class="badge" id="toggleBadge">展开</span>';
+            }
+        }
+
+        toggleRaw.addEventListener('change', function () {
+            applyFoldState(!this.checked);
+        });
+
+        toggleRaw.checked = false;
+        applyFoldState(true);
+
+        /* ============================================================
+           7. 主更新逻辑（含皮肤筛选、排序、移动端拆分）
+           ============================================================ */
+        function update() {
+
+            const T = Number(slider.value);
+            valueSpan.innerText = T;
+
+            // 判断是否为移动端（宽度 < 700px）
+            const isMobile = window.innerWidth < 700;
+
+            const selected = [];
+            model.forEach((r, i) => {
+                const cb = document.getElementById("r" + i);
+                if (cb && cb.checked) {
+                    const choice = choose(r, T);
+                    const location = getLocation(r, choice);
+                    const price = getPrice(r, choice);
+                    const giftName = getGiftName(r, choice);
+                    const gift = Math.ceil(54100 / choice);
+                    const cost = Math.ceil(gift * price);
+                    selected.push({
+                        ...r,
+                        choice,
+                        location,
+                        price,
+                        giftName,
+                        gift,
+                        cost
+                    });
+                }
+            });
+
+            // 地点排序
+            function parseLocation(loc) {
+                const idx = loc.lastIndexOf('(');
+                if (idx !== -1 && loc.endsWith(')')) {
+                    const name = loc.substring(0, idx).trim();
+                    const area = loc.substring(idx + 1, loc.length - 1).trim();
+                    return { name, area };
+                } else {
+                    return { name: loc, area: '' };
+                }
+            }
+
+            selected.sort((a, b) => {
+                const pa = parseLocation(a.location);
+                const pb = parseLocation(b.location);
+                const areaComp = pa.area.localeCompare(pb.area, undefined, { sensitivity: 'base' });
+                if (areaComp !== 0) return areaComp;
+                return pa.name.localeCompare(pb.name, undefined, { sensitivity: 'base' });
+            });
+
+            // 渲染表格
+            tbody.innerHTML = "";
+            let totalGift = 0;
+            let totalCost = 0;
+            let count = selected.length;
+
+            selected.forEach(r => {
+                totalGift += r.gift;
+                totalCost += r.cost;
+
+                // 地点显示：移动端拆分为两行（店名 + 区域）
+                let locationDisplay;
+                if (isMobile) {
+                    const parts = splitLocation(r.location);
+                    locationDisplay = parts.area ? `${parts.name}<br>${parts.area}` : parts.name;
+                } else {
+                    locationDisplay = r.location;
+                }
+
+                // 礼物名显示：移动端将 "-" 及其后面部分拆到下一行
+                const giftNameDisplay = splitGiftName(r.giftName, isMobile);
+
+                tbody.innerHTML += `
+                                    <tr>
+                                        <td class="col-role">${r.name}</td>
+                                        <td class="raw-col">${r.c100}</td>
+                                        <td class="raw-col">${r.c200}</td>
+                                        <td class="raw-col">${r.c400}</td>
+                                        <td class="raw-col">${r.e200}</td>
+                                        <td class="raw-col">${r.e400}</td>
+                                        <td class="col-choice">${r.choice}</td>
+                                        <td class="col-giftname">${giftNameDisplay}</td>
+                                        <td class="col-location">${locationDisplay}</td>
+                                        <td class="col-gift">${r.gift}</td>
+                                        <td class="col-cost">${formatNumber(r.cost)}</td>
+                                    </tr>`;
+            });
+
+            // 重新应用折叠状态
+            const hidden = !toggleRaw.checked;
+            if (hidden) {
+                document.querySelectorAll('.raw-col, .raw-group-header').forEach(el => {
+                    el.classList.add('hidden-raw');
+                });
+            } else {
+                document.querySelectorAll('.raw-col, .raw-group-header').forEach(el => {
+                    el.classList.remove('hidden-raw');
+                });
+            }
+
+            // 汇总
+            const avgCost = count ? totalCost / count : 0;
+            const avgGift = count ? Math.round(totalGift / count) : 0;
+            summary.innerHTML = `
+                                <span>人均方斯：${formatNumber(avgCost)}</span>
+                                <span>人均礼物：${avgGift}</span>
+                                <span class="total-cost">总方斯：${formatNumber(totalCost)}</span>
+                                <span>总礼物：${totalGift}</span>
+                            `;
+        }
+
+        /* ============================================================
+           8. 事件绑定（含窗口 resize 重新渲染）
+           ============================================================ */
+        slider.oninput = update;
+        document.addEventListener("change", update);
+
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.id && e.target.id.startsWith('r')) {
+                update();
+            }
+        });
+
+        btnSkinSelect.addEventListener('click', function () {
+            model.forEach((r, i) => {
+                const cb = document.getElementById("r" + i);
+                if (cb) {
+                    cb.checked = r.hasSkin;
+                }
+            });
+            update();
+        });
+
+        // 窗口尺寸变化时重新渲染，保证移动端两行切换
+        let resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                measureGiftNameColumn();
+                update();
+            }, 100);
+        });
+
+        update();
+
+        setTimeout(() => {
+            const badge = document.getElementById('toggleBadge');
+            if (badge) {
+                const hidden = !toggleRaw.checked;
+                badge.textContent = hidden ? '折叠' : '展开';
+            }
+        }, 10);
+    </script>
+
+</body>
+</html>
