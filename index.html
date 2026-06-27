@@ -35,112 +35,126 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
             margin-bottom: 24px;
             transition: box-shadow 0.2s;
+            position: relative;
         }
 
-            .card:hover {
-                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
-            }
+        .toggle-top-right {
+            position: absolute;
+            top: 22px;
+            right: 26px;
+        }
 
-            .card h2,
-            .card h3 {
-                margin: 0 0 14px 0;
-                font-weight: 500;
-                font-size: 19px;
-                color: #1a2744;
-                letter-spacing: -0.01em;
-            }
+        .card:hover {
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+        }
 
-            .card h2 {
-                font-size: 21px;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-
-                .card h2 .slider-value {
-                    background: #eef2f7;
-                    padding: 4px 20px;
-                    border-radius: 40px;
-                    font-weight: 500;
-                    color: #1a3a6a;
-                    font-size: 24px;
-                }
+        .card h2,
+        .card h3 {
+            margin: 0 0 14px 0;
+            font-weight: 500;
+            font-size: 19px;
+            color: #1a2744;
+            letter-spacing: -0.01em;
+        }
 
         /* ===== 控制行 ===== */
         .controls-row {
             display: flex;
             flex-wrap: wrap;
-            align-items: center;
-            gap: 28px 48px;
+            align-items: stretch;
+            gap: 24px 36px;
             margin-bottom: 18px;
         }
 
-        .slider-group {
+        /* ===== 曲线图 ===== */
+        .chart-wrapper {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            flex: 1 1 440px;
+            flex: 1 1 420px;
+            min-width: 300px;
         }
 
-            .slider-group label {
-                font-weight: 400;
-                color: #2a3a5a;
-                white-space: nowrap;
-                font-size: 17px;
-            }
-
-        .slider {
-            flex: 1;
-            min-width: 200px;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(to right, #d0d8e8, #2a4a7a);
-            border-radius: 4px;
-            outline: none;
-            transition: background 0.2s;
+        .chart-svg-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
         }
 
-            .slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 22px;
-                height: 22px;
-                border-radius: 50%;
-                background: #1a3a6a;
-                cursor: pointer;
-                box-shadow: 0 2px 8px rgba(26, 58, 106, 0.3);
-                transition: transform 0.15s, box-shadow 0.15s;
+        .chart-svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            display: block;
+        }
+
+        /* ===== 悬停提示框 ===== */
+        .chart-tooltip {
+            display: none;
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #c8d2e4;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #1a2a4a;
+            pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            z-index: 10;
+            line-height: 1.7;
+        }
+
+            .chart-tooltip.visible {
+                display: block;
             }
 
-                .slider::-webkit-slider-thumb:hover {
-                    transform: scale(1.12);
-                    box-shadow: 0 4px 14px rgba(26, 58, 106, 0.4);
-                }
+        .chart-info {
+            font-size: 15px;
+            color: #2a3a5a;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 4px;
+        }
 
-            .slider::-moz-range-thumb {
-                width: 22px;
-                height: 22px;
-                border-radius: 50%;
-                background: #1a3a6a;
-                cursor: pointer;
-                border: none;
-                box-shadow: 0 2px 8px rgba(26, 58, 106, 0.3);
+            .chart-info strong {
+                color: #1a3a6a;
+                font-weight: 500;
+                background: #eef2f7;
+                padding: 2px 12px;
+                border-radius: 20px;
+                font-size: 18px;
+            }
+
+        #dragHandle {
+            cursor: grab;
+            filter: drop-shadow(0 2px 6px rgba(26, 58, 106, 0.4));
+            transition: r 0.15s;
+        }
+
+            #dragHandle:active {
+                cursor: grabbing;
+            }
+
+            #dragHandle:hover {
+                filter: drop-shadow(0 4px 12px rgba(26, 58, 106, 0.55));
             }
 
         /* ===== Toggle 开关（折叠） ===== */
         .toggle-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: #f0f4fd;
-            padding: 8px 20px 8px 14px;
+            padding: 8px 16px 8px 12px;
             border-radius: 40px;
             border: 1px solid #dfe6f0;
             transition: background 0.2s, border-color 0.2s;
             user-select: none;
+            align-self: flex-start;
         }
 
             .toggle-group:hover {
@@ -215,37 +229,6 @@
                 margin-left: 6px;
             }
 
-
-        /* ===== 汇总信息 ===== */
-        .summary {
-            font-weight: 400;
-            font-size: 17px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px 32px;
-            padding: 12px 0 2px 0;
-            border-top: 1px solid #e8ecf4;
-            margin-top: 6px;
-        }
-
-            .summary span {
-                background: #f4f7fc;
-                padding: 6px 20px;
-                border-radius: 40px;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                color: #1a2a4a;
-                font-size: 16px;
-                border: 1px solid #e0e6f0;
-                font-weight: 400;
-            }
-
-                .summary span.total-cost {
-                    background: #f4f7fc;
-                    border-color: #e0e6f0;
-                    color: #1a2a4a;
-                }
 
         /* ===== 角色筛选折叠箭头 ===== */
         .role-toggle-arrow {
@@ -447,9 +430,10 @@
         /* ============================================================
            移动端适配（纵向堆叠 + 隐藏推荐值列 + 地点两行 + 礼物名拆分）
            ============================================================ */
-        @media (max-width: 700px) {
+        @media (max-width: 900px) {
             body {
                 padding: 16px 18px;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom, 60px));
                 font-size: 16px;
             }
 
@@ -458,45 +442,20 @@
                 margin-bottom: 18px;
             }
 
-            /* 纵向堆叠控制行 */
-            .controls-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 16px;
+            .toggle-top-right {
+                position: static;
+                align-self: center;
+                margin-top: 10px;
             }
-
-            .slider-group {
-                flex: 1 1 auto;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-
-                .slider-group label {
-                    white-space: normal;
-                    font-size: 16px;
-                    text-align: center;
-                }
-
-            .slider {
-                min-width: unset;
-                width: 100%;
-                height: 8px;
-            }
-
-                .slider::-webkit-slider-thumb {
-                    width: 26px;
-                    height: 26px;
-                }
-
-                .slider::-moz-range-thumb {
-                    width: 26px;
-                    height: 26px;
-                }
 
             .toggle-group {
-                align-self: center;
-                padding: 8px 18px 8px 12px;
+                padding: 5px 12px 5px 8px;
+                font-size: 13px;
+            }
+
+            .toggle-label .badge {
+                font-size: 10px;
+                padding: 1px 8px;
             }
 
             .toggle-switch {
@@ -521,17 +480,6 @@
 
 
 
-            /* 汇总缩紧 */
-            .summary {
-                font-size: 15px;
-                gap: 10px 18px;
-            }
-
-                .summary span {
-                    padding: 4px 14px;
-                    font-size: 14px;
-                }
-
             /* ===== 隐藏”推荐值”列 ===== */
             thead tr.labels th.col-choice,
             tbody td.col-choice {
@@ -541,7 +489,7 @@
             /* 表格更紧凑 */
             table {
                 font-size: 13px;
-                min-width: 700px;
+                min-width: 900px;
             }
 
             thead tr.labels th {
@@ -590,10 +538,6 @@
                 font-size: 18px;
             }
 
-                .card h2 .slider-value {
-                    font-size: 20px;
-                }
-
             .role {
                 font-size: 14px;
                 padding: 4px 12px 4px 8px;
@@ -624,8 +568,42 @@
         @media (max-width: 500px) {
             body {
                 padding: 12px 12px;
+                padding-bottom: calc(12px + env(safe-area-inset-bottom, 60px));
                 font-size: 15px;
             }
+
+            .toggle-top-right {
+                margin-top: 6px;
+            }
+
+            .toggle-group {
+                padding: 4px 10px 4px 6px;
+            }
+
+            .toggle-switch {
+                width: 32px;
+                height: 18px;
+            }
+
+            .toggle-slider::before {
+                height: 14px;
+                width: 14px;
+                left: 2px;
+                bottom: 2px;
+            }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(14px);
+            }
+
+            .toggle-label {
+                font-size: 12px;
+            }
+
+                .toggle-label .badge {
+                    font-size: 9px;
+                    padding: 1px 6px;
+                }
 
             .card {
                 padding: 14px 14px;
@@ -635,28 +613,9 @@
                     font-size: 16px;
                 }
 
-                    .card h2 .slider-value {
-                        font-size: 17px;
-                        padding: 2px 14px;
-                    }
-
-            .slider-group label {
-                font-size: 15px;
-            }
-
             .toggle-label {
                 font-size: 15px;
             }
-
-            .summary {
-                font-size: 13px;
-                gap: 8px 12px;
-            }
-
-                .summary span {
-                    padding: 4px 10px;
-                    font-size: 12px;
-                }
 
             table {
                 font-size: 12px;
@@ -711,10 +670,7 @@
                 }
         }
 
-        /* ===== 平滑过渡 ===== */
-        .raw-col {
-            transition: display 0.2s ease;
-        }
+        /* ===== 原始数据列折叠 ===== */
 
         .table-wrap::-webkit-scrollbar {
             height: 8px;
@@ -744,34 +700,28 @@
         <div class="card">
             <div class="controls-row">
 
-                <!-- 滑块 -->
-                <div class="slider-group">
-                    <label for="slider">我愿意用 <strong id="value" class="slider-value">4 300</strong> 方斯减少 1 个礼物</label>
-                    <input type="range"
-                           min="0"
-                           max="7000"
-                           value="4300"
-                           step="100"
-                           id="slider"
-                           class="slider">
-                </div>
-
-                <!-- 折叠开关 -->
-                <div class="toggle-group">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="toggleRaw">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label" id="toggleLabel">
-                        原始数据
-                        <span class="badge" id="toggleBadge">折叠</span>
-                    </span>
+                <!-- 图表 -->
+                <div class="chart-wrapper" id="chartWrapper">
+                    <div class="chart-info" id="chartInfo"></div>
+                    <div class="chart-svg-wrap">
+                        <svg id="chartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+                        <div class="chart-tooltip" id="chartTooltip"></div>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- 汇总信息 -->
-            <div class="summary" id="summary"></div>
+            <!-- 原始数据开关（右上角） -->
+            <div class="toggle-group toggle-top-right">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggleRaw">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label" id="toggleLabel">
+                    原始数据
+                    <span class="badge" id="toggleBadge">折叠</span>
+                </span>
+            </div>
         </div>
 
         <!-- ===== 角色筛选卡 ===== -->
@@ -1043,7 +993,7 @@
            3. 测量最长礼物名 & 设置列宽（CSS 变量）
            ============================================================ */
         function measureGiftNameColumn() {
-            const isMobile = window.innerWidth < 700;
+            const isMobile = window.innerWidth < 900;
             // 收集所有可能的礼物名
             const allNames = [];
             model.forEach(r => {
@@ -1091,19 +1041,21 @@
         /* ============================================================
            4. UI 引用
            ============================================================ */
-        const slider = document.getElementById("slider");
-        const valueSpan = document.getElementById("value");
+        // 初始阈值取 e200 的中位数，让初始图表展示一个合理的混合策略
+        const e200Sorted = model.map(r => r.e200).filter(v => v > 0).sort((a, b) => a - b);
+        let currentT = e200Sorted.length > 0 ? e200Sorted[Math.floor(e200Sorted.length * 0.25)] : 0;
         const tbody = document.getElementById("tbody");
-        const summary = document.getElementById("summary");
         const rolesDiv = document.getElementById("roles");
         const toggleRaw = document.getElementById("toggleRaw");
-        const toggleLabel = document.getElementById("toggleLabel");
         const toggleBadge = document.getElementById("toggleBadge");
         const btnSkinSelect = document.getElementById("btnSkinSelect");
         const skinBadge = document.getElementById("skinBadge");
+        const chartSvg = document.getElementById("chartSvg");
+        const chartInfo = document.getElementById("chartInfo");
+        const chartTooltip = document.getElementById("chartTooltip");
 
         /* ============================================================
-           4. 工具函数
+           5. 工具函数
            ============================================================ */
         function formatNumber(num) {
             return Math.round(num)
@@ -1147,59 +1099,324 @@
             return `${before}<br>${after}`;
         }
 
+        // 解析地点为 name + area（用于排序）
+        function parseLocation(loc) {
+            const idx = loc.lastIndexOf('(');
+            if (idx !== -1 && loc.endsWith(')')) {
+                const name = loc.substring(0, idx).trim();
+                const area = loc.substring(idx + 1, loc.length - 1).trim();
+                return { name, area };
+            }
+            return { name: loc, area: '' };
+        }
+
         /* ============================================================
-           5. 初始化角色复选框
+           6. 初始化角色复选框
            ============================================================ */
         let skinCount = 0;
+        const roleRows = [];
         model.forEach((r, i) => {
             if (r.hasSkin) skinCount++;
             const skinLabel = r.hasSkin ? ' <span class="skin-badge">皮肤</span>' : '';
-            rolesDiv.innerHTML += `
+            roleRows.push(`
                                 <label class="role">
                                     <input type="checkbox" id="r${i}" checked>
                                     ${r.name}${skinLabel}
-                                </label>`;
+                                </label>`);
         });
+        rolesDiv.innerHTML = roleRows.join('');
         skinBadge.textContent = skinCount;
 
         /* ============================================================
-           6. 折叠控制
+           7. 折叠控制
            ============================================================ */
         function applyFoldState(hidden) {
             const rawElements = document.querySelectorAll('.raw-col, .raw-group-header');
-            rawElements.forEach(el => {
-                if (hidden) {
-                    el.classList.add('hidden-raw');
-                } else {
-                    el.classList.remove('hidden-raw');
-                }
-            });
-            if (hidden) {
-                toggleBadge.textContent = '折叠';
-                toggleLabel.innerHTML = '原始数据 <span class="badge" id="toggleBadge">折叠</span>';
-            } else {
-                toggleBadge.textContent = '展开';
-                toggleLabel.innerHTML = '原始数据 <span class="badge" id="toggleBadge">展开</span>';
-            }
+            rawElements.forEach(el => el.classList.toggle('hidden-raw', hidden));
+            toggleBadge.textContent = hidden ? '折叠' : '展开';
         }
-
-        toggleRaw.addEventListener('change', function () {
-            applyFoldState(!this.checked);
-        });
 
         toggleRaw.checked = false;
         applyFoldState(true);
 
         /* ============================================================
-           7. 主更新逻辑（含皮肤筛选、排序、移动端拆分）
+           8. 曲线数据计算 & 绘图
+           ============================================================ */
+        function computeCurveData(selectedModel) {
+            if (selectedModel.length === 0) return [];
+
+            // 收集所有 e200、e400 作为阈值候选
+            const thresholds = new Set();
+            thresholds.add(0);
+            selectedModel.forEach(r => {
+                thresholds.add(r.e200);
+                thresholds.add(r.e400);
+            });
+            const Tvalues = Array.from(thresholds).sort((a, b) => a - b);
+
+            const points = [];
+            Tvalues.forEach(T => {
+                let totalGift = 0, totalCost = 0;
+                selectedModel.forEach(r => {
+                    const choice = choose(r, T);
+                    const price = getPrice(r, choice);
+                    const gift = Math.ceil(54100 / choice);
+                    totalGift += gift;
+                    totalCost += Math.ceil(gift * price);
+                });
+                const n = selectedModel.length;
+                points.push({
+                    T,
+                    avgGift: totalGift / n,
+                    avgCost: totalCost / n,
+                    totalGift,
+                    totalCost
+                });
+            });
+            return points;
+        }
+
+        function drawChart(curvePoints) {
+            const svg = chartSvg;
+            const W = 480, H = 480;
+            const pad = { left: 44, right: 17, top: 17, bottom: 44 };
+            const pw = W - pad.left - pad.right;
+            const ph = H - pad.top - pad.bottom;
+
+            let html = '';
+
+            if (curvePoints.length < 2) {
+                html += `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="15" fill="#8a9ab8">请选择角色</text>`;
+                svg.innerHTML = html;
+                svg._curvePoints = [];
+                return null;
+            }
+
+            let minGift = Infinity, maxGift = -Infinity;
+            let minCost = Infinity, maxCost = -Infinity;
+            curvePoints.forEach(p => {
+                if (p.avgGift < minGift) minGift = p.avgGift;
+                if (p.avgGift > maxGift) maxGift = p.avgGift;
+                if (p.avgCost < minCost) minCost = p.avgCost;
+                if (p.avgCost > maxCost) maxCost = p.avgCost;
+            });
+
+            const giftPad = Math.max((maxGift - minGift) * 0.08, 5);
+            const costPad = Math.max((maxCost - minCost) * 0.08, 500);
+            minGift -= giftPad; maxGift += giftPad;
+            minCost -= costPad; maxCost += costPad;
+
+            const rangeGift = maxGift - minGift || 1;
+            const rangeCost = maxCost - minCost || 1;
+
+            function x(p) { return pad.left + (p.avgGift - minGift) / rangeGift * pw; }
+            function y(p) { return pad.top + ph - (p.avgCost - minCost) / rangeCost * ph; }
+
+            // Grid lines (horizontal)
+            for (let i = 0; i <= 5; i++) {
+                const gy = pad.top + ph * i / 5;
+                html += `<line x1="${pad.left}" y1="${gy}" x2="${W - pad.right}" y2="${gy}" stroke="#e8ecf4" stroke-width="1"/>`;
+            }
+            // Grid lines (vertical)
+            for (let i = 0; i <= 4; i++) {
+                const gx = pad.left + pw * i / 4;
+                html += `<line x1="${gx}" y1="${pad.top}" x2="${gx}" y2="${H - pad.bottom}" stroke="#e8ecf4" stroke-width="1"/>`;
+            }
+
+            // Axes
+            html += `<line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${H - pad.bottom}" stroke="#b0bed8" stroke-width="1.5"/>`;
+            html += `<line x1="${pad.left}" y1="${H - pad.bottom}" x2="${W - pad.right}" y2="${H - pad.bottom}" stroke="#b0bed8" stroke-width="1.5"/>`;
+
+            // Y axis tick labels
+            for (let i = 0; i <= 4; i++) {
+                const val = minCost + rangeCost * i / 4;
+                const gy = pad.top + ph - ph * i / 4;
+                html += `<text x="${pad.left - 6}" y="${gy + 4}" text-anchor="end" font-size="11" fill="#6a7a9a">${formatNumber(Math.round(val))}</text>`;
+            }
+
+            // X axis tick labels
+            for (let i = 0; i <= 4; i++) {
+                const val = minGift + rangeGift * i / 4;
+                const gx = pad.left + pw * i / 4;
+                html += `<text x="${gx}" y="${H - pad.bottom + 16}" text-anchor="middle" font-size="11" fill="#6a7a9a">${Math.round(val)}</text>`;
+            }
+
+            // Axis titles
+            html += `<text x="${W / 2}" y="${H - 6}" text-anchor="middle" font-size="12" fill="#4a5e7a" font-weight="500">平均礼物次数 →</text>`;
+            html += `<text x="14" y="${H / 2}" text-anchor="middle" font-size="12" fill="#4a5e7a" font-weight="500" transform="rotate(-90, 14, ${H / 2})">← 平均方斯</text>`;
+
+            // 散点标记
+            curvePoints.forEach(p => {
+                html += `<circle cx="${x(p).toFixed(1)}" cy="${y(p).toFixed(1)}" r="3.5" fill="#1a3a6a" opacity="0.55"/>`;
+            });
+
+            // Current draggable handle — 精确匹配或取最近阈值
+            let cp = curvePoints.find(p => p.T === currentT);
+            if (!cp && curvePoints.length > 0) {
+                cp = curvePoints.reduce((best, p) =>
+                    Math.abs(p.T - currentT) < Math.abs(best.T - currentT) ? p : best
+                );
+                currentT = cp.T;
+            }
+            if (cp) {
+                html += `<circle cx="${x(cp).toFixed(1)}" cy="${y(cp).toFixed(1)}" r="11" fill="#1a3a6a" stroke="#ffffff" stroke-width="3" id="dragHandle"/>`;
+            }
+
+            svg.innerHTML = html;
+
+            // Store for drag lookup
+            svg._curvePoints = curvePoints;
+            svg._x = x;
+            svg._y = y;
+            svg._pad = pad;
+
+            return cp;
+        }
+
+        /* ============================================================
+           9. 图表拖拽 + 悬停提示
+           ============================================================ */
+        function setupChartDrag() {
+            let dragging = false;
+
+            function getSVGPos(e) {
+                const rect = chartSvg.getBoundingClientRect();
+                const vb = chartSvg.viewBox.baseVal;
+                const svgAspect = vb.width / vb.height;
+                const elemAspect = rect.width / rect.height;
+                let drawW, drawH, offX, offY;
+                if (elemAspect > svgAspect) {
+                    drawH = rect.height;
+                    drawW = rect.height * svgAspect;
+                    offX = (rect.width - drawW) / 2;
+                    offY = 0;
+                } else {
+                    drawW = rect.width;
+                    drawH = rect.width / svgAspect;
+                    offX = 0;
+                    offY = (rect.height - drawH) / 2;
+                }
+                const sx = vb.width / drawW;
+                const sy = vb.height / drawH;
+                const tx = (e.touches && e.touches[0]) ? e.touches[0] : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null);
+                const cx = tx ? tx.clientX : e.clientX;
+                const cy = tx ? tx.clientY : e.clientY;
+                return {
+                    x: (cx - rect.left - offX) * sx,
+                    y: (cy - rect.top - offY) * sy,
+                    screenX: cx,
+                    screenY: cy
+                };
+            }
+
+            function findNearest(svgX, svgY) {
+                const pts = chartSvg._curvePoints;
+                const fx = chartSvg._x;
+                const fy = chartSvg._y;
+                if (!pts || !fx || !fy) return null;
+                let best = null, bestD = Infinity;
+                pts.forEach(p => {
+                    const dx = fx(p) - svgX, dy = fy(p) - svgY;
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; best = p; }
+                });
+                return best;
+            }
+
+            function snapTo(near) {
+                if (near && near.T !== currentT) {
+                    currentT = near.T;
+                    update();
+                }
+            }
+
+            function showTooltip(near, screenX, screenY) {
+                if (!near) { hideTooltip(); return; }
+                const n = near;
+                chartTooltip.innerHTML = `
+                    人均方斯：<strong>${formatNumber(Math.round(n.avgCost))}</strong><br>
+                    人均礼物：<strong>${Math.round(n.avgGift)}</strong><br>
+                    总方斯：<strong>${formatNumber(n.totalCost)}</strong><br>
+                    总礼物：<strong>${n.totalGift}</strong>
+                `;
+                const parent = chartTooltip.parentElement;
+                const pr = parent.getBoundingClientRect();
+                let left = screenX - pr.left + 14;
+                let top = screenY - pr.top - 14;
+                if (left + 170 > pr.width) left = screenX - pr.left - 185;
+                if (top + 100 > pr.height) top = screenY - pr.top - 125;
+                if (left < 0) left = 4;
+                if (top < 0) top = 4;
+                chartTooltip.style.left = left + 'px';
+                chartTooltip.style.top = top + 'px';
+                chartTooltip.classList.add('visible');
+            }
+
+            function hideTooltip() {
+                chartTooltip.classList.remove('visible');
+            }
+
+            function onDown(e) {
+                const pos = getSVGPos(e);
+                const near = findNearest(pos.x, pos.y);
+                if (!near) return;
+
+                snapTo(near);
+                dragging = true;
+                const h = document.getElementById('dragHandle');
+                if (h) h.style.cursor = 'grabbing';
+                showTooltip(near, pos.screenX, pos.screenY);
+                e.preventDefault();
+            }
+
+            function onMove(e) {
+                const pos = getSVGPos(e);
+                const near = findNearest(pos.x, pos.y);
+                if (dragging) {
+                    e.preventDefault();
+                    snapTo(near);
+                    showTooltip(near, pos.screenX, pos.screenY);
+                } else if (chartSvg.contains(e.target)) {
+                    showTooltip(near, pos.screenX, pos.screenY);
+                } else {
+                    hideTooltip();
+                }
+            }
+
+            function onUp(e) {
+                if (!dragging) return;
+                dragging = false;
+
+                const pos = getSVGPos(e);
+                const near = findNearest(pos.x, pos.y);
+                snapTo(near);
+
+                const h = document.getElementById('dragHandle');
+                if (h) h.style.cursor = 'grab';
+            }
+
+            function onLeave() {
+                if (!dragging) hideTooltip();
+            }
+
+            chartSvg.addEventListener('mousedown', onDown);
+            chartSvg.addEventListener('touchstart', onDown, { passive: false });
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('mouseup', onUp);
+            document.addEventListener('touchend', onUp);
+            chartSvg.addEventListener('mouseleave', onLeave);
+        }
+
+        setupChartDrag();
+
+        /* ============================================================
+           10. 主更新逻辑
            ============================================================ */
         function update() {
 
-            const T = Number(slider.value);
-            valueSpan.innerText = T;
-
-            // 判断是否为移动端（宽度 < 700px）
-            const isMobile = window.innerWidth < 700;
+            const T = currentT;
+            const isMobile = window.innerWidth < 900;
 
             const selected = [];
             model.forEach((r, i) => {
@@ -1224,17 +1441,6 @@
             });
 
             // 地点排序
-            function parseLocation(loc) {
-                const idx = loc.lastIndexOf('(');
-                if (idx !== -1 && loc.endsWith(')')) {
-                    const name = loc.substring(0, idx).trim();
-                    const area = loc.substring(idx + 1, loc.length - 1).trim();
-                    return { name, area };
-                } else {
-                    return { name: loc, area: '' };
-                }
-            }
-
             selected.sort((a, b) => {
                 const pa = parseLocation(a.location);
                 const pb = parseLocation(b.location);
@@ -1244,25 +1450,16 @@
             });
 
             // 渲染表格（含地点合并）
-            tbody.innerHTML = "";
-            let totalGift = 0;
-            let totalCost = 0;
-            let count = selected.length;
-
-            // 预计算地点 rowspan：相同地点连续出现时合并
             const rowspans = new Array(selected.length).fill(1);
             for (let i = selected.length - 2; i >= 0; i--) {
                 if (selected[i].location === selected[i + 1].location) {
                     rowspans[i] = rowspans[i + 1] + 1;
-                    rowspans[i + 1] = 0; // 后续行不渲染地点
+                    rowspans[i + 1] = 0;
                 }
             }
 
+            const rows = [];
             selected.forEach((r, idx) => {
-                totalGift += r.gift;
-                totalCost += r.cost;
-
-                // 地点显示：移动端拆分为两行（店名 + 区域）
                 let locationDisplay;
                 if (isMobile) {
                     const parts = splitLocation(r.location);
@@ -1271,7 +1468,6 @@
                     locationDisplay = r.location;
                 }
 
-                // 礼物名显示：移动端将 "-" 及其后面部分拆到下一行
                 const giftNameDisplay = splitGiftName(r.giftName, isMobile);
 
                 const rowspan = rowspans[idx];
@@ -1279,7 +1475,7 @@
                     ? `<td class="col-location" rowspan="${rowspan}">${locationDisplay}</td>`
                     : '';
 
-                tbody.innerHTML += `
+                rows.push(`
                                     <tr>
                                         <td class="col-role">${r.name}</td>
                                         <td class="raw-col">${r.c100}</td>
@@ -1292,43 +1488,32 @@
                                         <td class="col-giftname">${giftNameDisplay}</td>
                                         <td class="col-gift">${r.gift}</td>
                                         <td class="col-cost">${formatNumber(r.cost)}</td>
-                                    </tr>`;
+                                    </tr>`);
+            });
+            tbody.innerHTML = rows.join('');
+
+            // 折叠状态
+            const hidden = !toggleRaw.checked;
+            document.querySelectorAll('.raw-col, .raw-group-header').forEach(el => {
+                el.classList.toggle('hidden-raw', hidden);
             });
 
-            // 重新应用折叠状态
-            const hidden = !toggleRaw.checked;
-            if (hidden) {
-                document.querySelectorAll('.raw-col, .raw-group-header').forEach(el => {
-                    el.classList.add('hidden-raw');
-                });
-            } else {
-                document.querySelectorAll('.raw-col, .raw-group-header').forEach(el => {
-                    el.classList.remove('hidden-raw');
-                });
-            }
+            // 更新曲线图
+            const curvePoints = computeCurveData(selected);
+            drawChart(curvePoints);
 
-            // 汇总
-            const avgCost = count ? totalCost / count : 0;
-            const avgGift = count ? Math.round(totalGift / count) : 0;
-            summary.innerHTML = `
-                                <span>人均方斯：${formatNumber(avgCost)}</span>
-                                <span>人均礼物：${avgGift}</span>
-                                <span class="total-cost">总方斯：${formatNumber(totalCost)}</span>
-                                <span>总礼物：${totalGift}</span>
-                            `;
+            // 更新曲线信息行
+            chartInfo.innerHTML = `我愿意用 <strong>${T}</strong> 方斯减少一件礼物`;
         }
 
         /* ============================================================
-           8. 事件绑定（含窗口 resize 重新渲染）
+           11. 事件绑定
            ============================================================ */
-        slider.oninput = update;
-        document.addEventListener("change", update);
+        // 角色筛选复选框变化 → 刷新
+        rolesDiv.addEventListener('change', update);
 
-        document.addEventListener('change', function (e) {
-            if (e.target && e.target.id && e.target.id.startsWith('r')) {
-                update();
-            }
-        });
+        // 原始数据开关变化 → 刷新
+        toggleRaw.addEventListener('change', update);
 
         btnSkinSelect.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -1347,7 +1532,7 @@
         const rolesContainer = document.getElementById('roles');
 
         function isMobile() {
-            return window.innerWidth < 700;
+            return window.innerWidth < 900;
         }
 
         roleFilterHeader.addEventListener('click', function () {
@@ -1356,7 +1541,7 @@
             roleToggleArrow.classList.toggle('open', open);
         });
 
-        // 窗口尺寸变化时重新渲染，保证移动端两行切换
+        // 窗口尺寸变化时重新渲染
         let resizeTimer;
         window.addEventListener('resize', function () {
             clearTimeout(resizeTimer);
@@ -1367,14 +1552,6 @@
         });
 
         update();
-
-        setTimeout(() => {
-            const badge = document.getElementById('toggleBadge');
-            if (badge) {
-                const hidden = !toggleRaw.checked;
-                badge.textContent = hidden ? '折叠' : '展开';
-            }
-        }, 10);
     </script>
 
 </body>
