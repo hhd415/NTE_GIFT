@@ -409,6 +409,7 @@
             background: white;
             border: 1px solid #e8ecf4;
             -webkit-overflow-scrolling: touch;
+            margin-bottom: 24px;
         }
 
         /* ===== 表格 ===== */
@@ -871,6 +872,9 @@
                     🎯 仅选择有皮肤的角色
                     <span class="skin-badge" id="skinBadge">0</span>
                 </span>
+                <span class="role" id="btnSelectAll">
+                    ✅ 选择所有角色
+                </span>
                 <span class="role-toggle-arrow" id="roleToggleArrow">▼</span>
             </h3>
             <div class="roles" id="roles"></div>
@@ -902,6 +906,12 @@
                 </thead>
                 <tbody id="tbody"></tbody>
             </table>
+        </div>
+
+        <!-- ===== 最佳角色卡 ===== -->
+        <div class="card" id="bestCharsCard" style="display:none;">
+            <h3>云朵、电影院最佳角色</h3>
+            <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;"></div>
         </div>
 
     </div>
@@ -1200,10 +1210,13 @@
         const toggleRaw = document.getElementById("toggleRaw");
         const toggleBadge = document.getElementById("toggleBadge");
         const btnSkinSelect = document.getElementById("btnSkinSelect");
+        const btnSelectAll = document.getElementById("btnSelectAll");
         const skinBadge = document.getElementById("skinBadge");
         const chartSvg = document.getElementById("chartSvg");
         const chartInfo = document.getElementById("chartInfo");
         const chartTooltip = document.getElementById("chartTooltip");
+        const bestCharsCard = document.getElementById("bestCharsCard");
+        const bestCharsContent = document.getElementById("bestCharsContent");
 
         /* ============================================================
            5. 工具函数
@@ -1655,6 +1668,16 @@
 
             // 更新曲线信息行
             chartInfo.innerHTML = `我愿意用 <strong>${T}</strong> 方斯减少一件礼物`;
+
+            // 更新最佳角色卡
+            const matched = selected.filter(r => r.e200 === T || r.e400 === T);
+            if (matched.length > 0) {
+                const names = matched.map(r => `<strong>${r.name}</strong>`).join('、');
+                bestCharsContent.innerHTML = `当前阈值对应角色：${names}`;
+                bestCharsCard.style.display = '';
+            } else {
+                bestCharsCard.style.display = 'none';
+            }
         }
 
         /* ============================================================
@@ -1672,6 +1695,17 @@
                 const cb = document.getElementById("r" + i);
                 if (cb) {
                     cb.checked = r.hasSkin;
+                }
+            });
+            update();
+        });
+
+        btnSelectAll.addEventListener('click', function (e) {
+            e.stopPropagation();
+            model.forEach((r, i) => {
+                const cb = document.getElementById("r" + i);
+                if (cb) {
+                    cb.checked = true;
                 }
             });
             update();
