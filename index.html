@@ -2453,5 +2453,14 @@
         }
     </script>
 
+    <div class="container" style="margin-top:24px;">
+        <div class="card" style="font-size:14px;color:#5a6a8a;line-height:2;">
+            <h3>📐计算规则说明</h3>
+            <p>阈值 <strong>T</strong> 就是你愿意为省下一次送礼机会多花多少方斯，此逻辑可避免只对比一个角色的三挡礼物可能导致的从全角色来看损失方斯。当角色的 e200 ≤ T 时，升到 200 档更划算；当 e400 ≤ T 时，升到 400 档。</p>
+            <p><strong>e200</strong> = ⌈200档价格 − 2 × 100档价格⌉，即用 1 个 200 档替代 2 个 100 档需要多花的方斯。</p>
+            <p><strong>e400</strong> = ⌈(400档价格 − 4 × 100档价格) ÷ 3⌉，即用 1 个 400 档替代 4 个 100 档时，每减少一件礼物平均多花的方斯（共省 3 件，除以 3）。</p>
+        </div>
+    </div>
+
 </body>
 </html>
