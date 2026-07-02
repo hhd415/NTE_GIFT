@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>异环礼物计算</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -36,35 +37,13 @@
 
     <div class="container">
 
-        <!-- ===== 控制卡（含汇总） ===== -->
-        <div class="card">
-            <div class="controls-row">
-
-                <!-- 图表 -->
-                <div class="chart-wrapper" id="chartWrapper">
-                    <div class="chart-info" id="chartInfo"></div>
-                    <div class="chart-svg-wrap">
-                        <svg id="chartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
-                        <div class="chart-tooltip" id="chartTooltip"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- 原始数据开关（右上角） -->
-            <div class="toggle-group toggle-top-right">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="toggleRaw">
-                    <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label" id="toggleLabel">
-                    原始数据
-                    <span class="badge" id="toggleBadge">折叠</span>
-                </span>
-            </div>
+        <!-- ===== 视图切换 Tab ===== -->
+        <div class="view-tabs">
+            <div class="view-tab active" data-view="chart">🎯 二维图展示法</div>
+            <div class="view-tab" data-view="strategy">📊 表格展示法</div>
         </div>
 
-        <!-- ===== 角色筛选卡 ===== -->
+        <!-- ===== 角色筛选卡（两个视图共享） ===== -->
         <div class="card">
             <h3 id="roleFilterHeader" class="role-filter-header">
                 角色筛选
@@ -80,72 +59,116 @@
             <div class="roles" id="roles"></div>
         </div>
 
-        <!-- ===== 最佳角色卡 ===== -->
-        <div class="card" id="bestCharsCard">
-            <h3>云朵、电影院最佳角色</h3>
-            <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽图表圆点以查看对应角色</div>
-        </div>
+        <!-- ===== 图表视图 ===== -->
+        <div id="chartView">
 
-        <!-- ===== 表格 ===== -->
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr class="group">
-                        <th colspan="1">名字</th>
-                        <th colspan="5" class="raw-group-header">原始数据及计算</th>
-                        <th colspan="3">推荐</th>
-                        <th colspan="2">结果</th>
-                    </tr>
-                    <tr class="labels">
-                        <th>角色</th>
-                        <th class="raw-col">100</th>
-                        <th class="raw-col">200</th>
-                        <th class="raw-col">400</th>
-                        <th class="raw-col">用200礼物减少</th>
-                        <th class="raw-col">用400礼物减少</th>
-                        <th class="col-choice">推荐值</th>
-                        <th>地点</th>
-                        <th>礼物名</th>
-                        <th>总礼物</th>
-                        <th>总方斯</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody"></tbody>
-            </table>
-        </div>
-
-        <!-- ===== 补礼物计算 ===== -->
-        <div class="card gift-calc-card">
-            <h3>📦 补礼物计算</h3>
-            <div class="calc-row">
-                <div class="calc-field">
-                    <label for="gcChar">角色</label>
-                    <select id="gcChar"></select>
+            <!-- 控制卡（二维图 + 开关） -->
+            <div class="card">
+                <div class="controls-row">
+                    <!-- 图表 -->
+                    <div class="chart-wrapper" id="chartWrapper">
+                        <div class="chart-info" id="chartInfo"></div>
+                        <div class="chart-svg-wrap">
+                            <svg id="chartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+                            <div class="chart-tooltip" id="chartTooltip"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="calc-field">
-                    <label for="gcLevel">当前等级</label>
-                    <select id="gcLevel">
-                        <option value="0">0 级</option>
-                        <option value="1">1 级</option>
-                        <option value="2">2 级</option>
-                        <option value="3">3 级</option>
-                        <option value="4">4 级</option>
-                        <option value="5">5 级</option>
-                        <option value="6">6 级</option>
-                        <option value="7">7 级</option>
-                        <option value="8">8 级</option>
-                        <option value="9">9 级</option>
-                    </select>
-                </div>
-                <div class="calc-field">
-                    <label for="gcExp">当前经验</label>
-                    <input type="number" id="gcExp" value="0" min="0" step="1">
+                <!-- 原始数据开关（右上角） -->
+                <div class="toggle-group toggle-top-right">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleRaw">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label" id="toggleLabel">
+                        原始数据
+                        <span class="badge" id="toggleBadge">折叠</span>
+                    </span>
                 </div>
             </div>
-            <div class="calc-result" id="gcResult">
-                <div class="result-sub">请选择角色和等级后查看计算结果</div>
+
+            <!-- 最佳角色卡 -->
+            <div class="card" id="bestCharsCard">
+                <h3>云朵、电影院最佳角色</h3>
+                <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽图表圆点以查看对应角色</div>
             </div>
-        </div>
+
+            <!-- 表格 -->
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr class="group">
+                            <th colspan="1">名字</th>
+                            <th colspan="5" class="raw-group-header">原始数据及计算</th>
+                            <th colspan="3">推荐</th>
+                            <th colspan="2">结果</th>
+                        </tr>
+                        <tr class="labels">
+                            <th>角色</th>
+                            <th class="raw-col">100</th>
+                            <th class="raw-col">200</th>
+                            <th class="raw-col">400</th>
+                            <th class="raw-col">用200礼物减少</th>
+                            <th class="raw-col">用400礼物减少</th>
+                            <th class="col-choice">推荐值</th>
+                            <th>地点</th>
+                            <th>礼物名</th>
+                            <th>总礼物</th>
+                            <th>总方斯</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- 补礼物计算 -->
+            <div class="card gift-calc-card">
+                <h3>📦 补礼物计算</h3>
+                <div class="calc-row">
+                    <div class="calc-field">
+                        <label for="gcChar">角色</label>
+                        <select id="gcChar"></select>
+                    </div>
+                    <div class="calc-field">
+                        <label for="gcLevel">当前等级</label>
+                        <select id="gcLevel">
+                            <option value="0">0 级</option>
+                            <option value="1">1 级</option>
+                            <option value="2">2 级</option>
+                            <option value="3">3 级</option>
+                            <option value="4">4 级</option>
+                            <option value="5">5 级</option>
+                            <option value="6">6 级</option>
+                            <option value="7">7 级</option>
+                            <option value="8">8 级</option>
+                            <option value="9">9 级</option>
+                        </select>
+                    </div>
+                    <div class="calc-field">
+                        <label for="gcExp">当前经验</label>
+                        <input type="number" id="gcExp" value="0" min="0" step="1">
+                    </div>
+                </div>
+                <div class="calc-result" id="gcResult">
+                    <div class="result-sub">请选择角色和等级后查看计算结果</div>
+                </div>
+            </div>
+
+        </div><!-- #chartView -->
+
+        <!-- ===== 方案对比视图 ===== -->
+        <div id="strategyView" class="view-hidden">
+
+            <div class="card">
+                <div class="strategy-summary-bar">
+                    <span class="strategy-count" id="strategyCount">0 种方案</span>
+                    <span class="strategy-hint">天数越少，越偏向高价值礼物（省次数但费方斯）</span>
+                    <button class="btn-screenshot" id="btnSaveAll" onclick="saveAllScreenshots()">📷 一键保存全部截图</button>
+                </div>
+                <div id="strategiesContainer"></div>
+            </div>
+
+        </div><!-- #strategyView -->
 
     </div>
 

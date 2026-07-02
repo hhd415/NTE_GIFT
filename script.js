@@ -789,9 +789,229 @@ update = function() {
     _origUpdate();
     if (gcChar.options.length === 0) initGiftCalc();
     else updateGiftCalc();
+    // 同步更新策略视图
+    updateStrategyView();
 };
 
 // Also init on first load
 if (typeof model !== 'undefined' && model.length > 0) {
     initGiftCalc();
+}
+
+/* ============================================================
+   15. 方案对比视图
+   ============================================================ */
+const strategiesContainer = document.getElementById("strategiesContainer");
+const strategyCountEl = document.getElementById("strategyCount");
+
+function computeStrategies(selectedModel) {
+    if (selectedModel.length === 0) return [];
+
+    const thresholds = new Set();
+    thresholds.add(0);
+    selectedModel.forEach(r => {
+        thresholds.add(r.e200);
+        thresholds.add(r.e400);
+    });
+    const Tvalues = Array.from(thresholds).sort((a, b) => a - b);
+
+    const strategies = [];
+    let prevKey = null;
+
+    Tvalues.forEach(T => {
+        const unsorted = selectedModel.map(r => {
+            const choice = choose(r, T);
+            const price = getPrice(r, choice);
+            const giftName = getGiftName(r, choice);
+            const location = getLocation(r, choice);
+            const gift = Math.ceil(54100 / choice);
+            const cost = Math.ceil(gift * price);
+            return { ...r, choice, price, giftName, location, gift, cost };
+        });
+
+        unsorted.sort((a, b) => {
+            const pa = parseLocation(a.location);
+            const pb = parseLocation(b.location);
+            const areaComp = pa.area.localeCompare(pb.area, undefined, { sensitivity: 'base' });
+            if (areaComp !== 0) return areaComp;
+            return pa.name.localeCompare(pb.name, undefined, { sensitivity: 'base' });
+        });
+
+        const key = unsorted.map(r => r.choice).join(',');
+        if (key === prevKey) return;
+        prevKey = key;
+
+        let totalGift = 0, totalCost = 0;
+        unsorted.forEach(r => { totalGift += r.gift; totalCost += r.cost; });
+        const n = selectedModel.length;
+
+        const triggerChars = [];
+        selectedModel.forEach(r => {
+            if (r.e200 === T) triggerChars.push({ name: r.name, from: 100, to: 200 });
+            if (r.e400 === T) triggerChars.push({ name: r.name, from: 200, to: 400 });
+        });
+
+        strategies.push({
+            T,
+            rows: unsorted,
+            avgGift: totalGift / n,
+            avgCost: totalCost / n,
+            totalGift,
+            totalCost,
+            triggerChars
+        });
+    });
+
+    return strategies;
+}
+
+function renderStrategies(strategies) {
+    if (strategies.length === 0) {
+        strategiesContainer.innerHTML = '<div class="empty-state">请至少选择一个角色</div>';
+        strategyCountEl.textContent = '0 种方案';
+        return;
+    }
+
+    strategyCountEl.textContent = strategies.length + ' 种方案';
+
+    let html = '<div class="strategies-grid">';
+
+    strategies.forEach((strat, idx) => {
+        const rows = strat.rows;
+        const rowspans = new Array(rows.length).fill(1);
+        for (let i = rows.length - 2; i >= 0; i--) {
+            if (rows[i].location === rows[i + 1].location) {
+                rowspans[i] = rowspans[i + 1] + 1;
+                rowspans[i + 1] = 0;
+            }
+        }
+
+        const tableRows = rows.map((r, i) => {
+            const rowspan = rowspans[i];
+            const locationCell = rowspan > 0
+                ? `<td class="col-location" rowspan="${rowspan}">${r.location}</td>`
+                : '';
+
+            return `
+                        <tr>
+                            <td class="col-role">${r.name}</td>
+                            <td class="col-choice">${r.choice}</td>
+                            <td class="col-giftname">${r.giftName}</td>
+                            ${locationCell}
+                            <td class="col-gift">${r.gift}</td>
+                            <td class="col-cost">${formatNumber(r.cost)}</td>
+                        </tr>`;
+        }).join('');
+
+        html += `
+                    <div class="strategy-card">
+                        <div class="strategy-header">
+                            <span class="t-label">平均天数</span><br>
+                            <span class="t-value">${(strat.avgGift / 10).toFixed(1)} 天</span>
+                            <span class="stat-group">
+                                <span>人均礼物 <strong>${strat.avgGift.toFixed(1)}</strong></span>
+                                <span>人均方斯 <strong>${formatNumber(Math.round(strat.avgCost))}</strong></span>
+                                <span>总方斯 <strong>${formatNumber(strat.totalCost)}</strong></span>
+                            </span>
+                        </div>
+                        <div class="strategy-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>角色</th>
+                                        <th>档位</th>
+                                        <th>礼物名</th>
+                                        <th>地点</th>
+                                        <th>礼物数</th>
+                                        <th>方斯</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                            ${strat.triggerChars.length > 0 ? `
+                            <div class="strategy-note">
+                                其它好感来源最适合给的角色：${strat.triggerChars.map(c => `<span class="trigger-tag">${c.name}</span>`).join('、')}
+                            </div>` : ''}
+                        </div>
+                    </div>`;
+    });
+
+    html += '</div>';
+    strategiesContainer.innerHTML = html;
+}
+
+function updateStrategyView() {
+    const selected = [];
+    model.forEach((r, i) => {
+        const cb = document.getElementById("r" + i);
+        if (cb && cb.checked) {
+            selected.push(r);
+        }
+    });
+    const strategies = computeStrategies(selected);
+    renderStrategies(strategies);
+}
+
+/* ============================================================
+   16. 视图切换
+   ============================================================ */
+const chartView = document.getElementById("chartView");
+const strategyView = document.getElementById("strategyView");
+const viewTabs = document.querySelectorAll(".view-tab");
+
+function switchView(viewName) {
+    if (viewName === 'chart') {
+        chartView.classList.remove('view-hidden');
+        strategyView.classList.add('view-hidden');
+    } else {
+        chartView.classList.add('view-hidden');
+        strategyView.classList.remove('view-hidden');
+        updateStrategyView();
+    }
+    viewTabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.view === viewName);
+    });
+}
+
+viewTabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+        switchView(this.dataset.view);
+    });
+});
+
+/* ============================================================
+   17. 一键保存全部截图
+   ============================================================ */
+async function saveAllScreenshots() {
+    const cards = document.querySelectorAll('.strategy-card');
+    if (cards.length === 0) {
+        alert('没有可保存的方案');
+        return;
+    }
+    const btn = document.getElementById('btnSaveAll');
+    btn.disabled = true;
+
+    for (let i = 0; i < cards.length; i++) {
+        btn.textContent = `⏳ ${i + 1}/${cards.length}...`;
+        try {
+            const canvas = await html2canvas(cards[i], {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                useCORS: true,
+                logging: false,
+            });
+            const tValue = cards[i].querySelector('.t-value').textContent.trim();
+            const filename = '异环礼物方案_' + tValue.replace(/\s+/g, '_') + '.png';
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            await new Promise(r => setTimeout(r, 500));
+        } catch (e) {
+            alert(`第 ${i + 1} 个截图失败：` + e.message);
+        }
+    }
+
+    btn.textContent = '📷 一键保存全部截图';
+    btn.disabled = false;
 }
