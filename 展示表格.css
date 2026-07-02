@@ -1,0 +1,473 @@
+/* ===== 全局重置 & 字体 ===== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #f0f2f8;
+    padding: 0 32px 28px;
+    color: #1a1f2e;
+    margin: 0;
+    min-height: 100vh;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+/* ===== 页面标题 ===== */
+.page-header {
+    text-align: center;
+    padding: 28px 0 10px;
+    margin: 0 -32px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 500;
+    color: #1a2744;
+    letter-spacing: 0.5px;
+}
+
+.page-header .page-subtitle {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #8a9ab8;
+    font-weight: 400;
+}
+
+/* ===== 公告栏 ===== */
+.announcement-bar {
+    background: linear-gradient(135deg, #ff6b00, #ff8c00);
+    color: #fff;
+    text-align: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
+    transition: background 0.2s;
+    margin: 0 -32px;
+}
+
+.announcement-bar:hover {
+    background: linear-gradient(135deg, #e85d00, #f07800);
+}
+
+.announcement-bar::before {
+    content: '📢 ';
+}
+
+/* ===== 弹窗遮罩 ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    text-align: center;
+    position: relative;
+    animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px; right: 16px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #8a9ab8;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #1a2a4a;
+    background: #eef2f8;
+}
+
+.modal-card h3 {
+    margin: 0 0 16px;
+    font-size: 20px;
+    color: #ff6b00;
+    font-weight: 500;
+}
+
+.modal-card p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #3a4a6a;
+    line-height: 1.8;
+}
+
+.modal-card .contact-method {
+    display: inline-block;
+    background: #fef5ec;
+    color: #d45a00;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    margin: 0 2px;
+}
+
+.modal-card .email-link {
+    color: #1a3a6a;
+    text-decoration: none;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.modal-card .email-link:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ===== 卡片 ===== */
+.card {
+    background: #ffffff;
+    padding: 26px 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+}
+
+.card h2,
+.card h3 {
+    margin: 0 0 14px 0;
+    font-weight: 500;
+    font-size: 19px;
+    color: #1a2744;
+    letter-spacing: -0.01em;
+}
+
+/* ===== 角色选择 ===== */
+.roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-top: 6px;
+}
+
+.role {
+    background: #f0f4fd;
+    padding: 6px 16px 6px 10px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 400;
+    color: #1a2a4a;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, transform 0.1s;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.role:hover {
+    background: #e4ebf8;
+    transform: translateY(-1px);
+}
+
+.role input {
+    margin: 0;
+    accent-color: #1a3a6a;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.role .skin-badge {
+    background: #1a3a6a;
+    color: white;
+    font-size: 10px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+.role-action {
+    background: #e8f5e9 !important;
+    border: 1px solid #c8e6c9 !important;
+    color: #2e7d32 !important;
+    font-weight: 500;
+}
+
+.role-action:hover {
+    background: #c8e6c9 !important;
+    border-color: #a5d6a7 !important;
+}
+
+/* ===== 策略数量指示 ===== */
+.strategy-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.strategy-count {
+    background: #1a3a6a;
+    color: white;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.strategy-hint {
+    font-size: 14px;
+    color: #8a9ab8;
+}
+
+/* ===== 策略容器 ===== */
+.strategies-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ===== 策略卡片 ===== */
+.strategy-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 2px solid #8a9ab8;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.strategy-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+}
+
+.strategy-header {
+    background: #f6f8fc;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e8ecf4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px 24px;
+}
+
+.strategy-header .t-label {
+    font-size: 14px;
+    color: #6a7a9a;
+    font-weight: 400;
+}
+
+.strategy-header .t-value {
+    font-size: 17px;
+    font-weight: 500;
+    color: #1a3a6a;
+    background: #e8ecf8;
+    padding: 2px 16px;
+    border-radius: 20px;
+}
+
+.strategy-header .stat-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #3a4a6a;
+}
+
+.strategy-header .stat-group span strong {
+    color: #1a3a6a;
+    font-weight: 500;
+}
+
+.strategy-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.strategy-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 700px;
+    line-height: 1.6;
+    border: 1px solid #d6deec;
+}
+
+.strategy-body thead th {
+    background: #eef2f8;
+    color: #1a2a4a;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border-right: 1px solid #d6deec;
+    border-bottom: 2px solid #c8d2e4;
+    white-space: nowrap;
+}
+
+.strategy-body thead th:last-child {
+    border-right: none;
+}
+
+.strategy-body tbody td {
+    border-bottom: 1px solid #eef2f8;
+    padding: 9px 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    background: white;
+    transition: background 0.12s;
+}
+
+.strategy-body tbody tr:hover td {
+    background: #f6faff;
+}
+
+.strategy-body tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== 策略备注（触发角色） ===== */
+.strategy-note {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #4a5e7a;
+    background: #fafbfd;
+    border-top: 1px solid #e8ecf4;
+    line-height: 1.8;
+}
+
+.trigger-tag {
+    display: inline-block;
+    background: #e8ecf8;
+    color: #1a3a6a;
+    padding: 1px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 2px;
+}
+
+.col-role {
+    font-weight: 500;
+    color: #0f1f3a;
+    white-space: nowrap;
+    font-size: 15px;
+}
+
+.col-choice {
+    font-weight: 500;
+    color: #1a3a6a;
+    font-size: 15px;
+}
+
+.col-giftname {
+    font-size: 13px;
+    color: #1f3a6a;
+    white-space: nowrap;
+}
+
+.col-location {
+    font-size: 13px;
+    color: #4a5e7a;
+    white-space: nowrap;
+}
+
+.col-gift {
+    font-weight: 500;
+    color: #0f3b6a;
+}
+
+.col-cost {
+    font-weight: 500;
+    color: #0f3b6a;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.2px;
+}
+
+/* ===== 空状态 ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8a9ab8;
+    font-size: 16px;
+}
+
+
+/* ===== 滚动条 ===== */
+.strategy-body::-webkit-scrollbar {
+    height: 6px;
+}
+
+.strategy-body::-webkit-scrollbar-track {
+    background: #eef2f8;
+    border-radius: 3px;
+}
+
+.strategy-body::-webkit-scrollbar-thumb {
+    background: #c8d2e4;
+    border-radius: 3px;
+}
+
+.strategy-body::-webkit-scrollbar-thumb:hover {
+    background: #a8b6d0;
+}
+
+/* ===== 截图按钮 ===== */
+.btn-screenshot {
+    background: #1a3a6a;
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.btn-screenshot:hover {
+    background: #0f2a4e;
+    transform: translateY(-1px);
+}
+
+.btn-screenshot:active {
+    transform: scale(0.96);
+}
