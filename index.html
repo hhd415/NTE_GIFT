@@ -2411,17 +2411,20 @@
             const count = countBonus + countBase;
             const totalCost = count * t.price;
 
-            html += `<table class="result-table">`;
-            html += `<thead><tr><th>角色</th><th>推荐值</th><th>地点</th><th>礼物名</th><th>总礼物</th><th>总方斯</th></tr></thead><tbody>`;
+            html += `<div class="table-wrap">`;
+            html += `<table>`;
+            html += `<thead><tr class="labels">`;
+            html += `<th>角色</th><th class="col-choice">推荐值</th><th>地点</th><th>礼物名</th><th>总礼物</th><th>总方斯</th>`;
+            html += `</tr></thead><tbody>`;
             html += `<tr>`;
             html += `<td>${r.name}</td>`;
             html += `<td>${t.tier}</td>`;
             html += `<td>${getLocation(r, t.tier)}</td>`;
             html += `<td>${t.name}</td>`;
             html += `<td>${count}</td>`;
-            html += `<td class="cost-col">${formatNumber(totalCost)}</td>`;
+            html += `<td>${formatNumber(totalCost)}</td>`;
             html += `</tr>`;
-            html += `</tbody></table>`;
+            html += `</tbody></table></div>`;
 
             gcResult.innerHTML = html;
         }
