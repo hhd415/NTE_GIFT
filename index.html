@@ -1676,9 +1676,26 @@
         /* ============================================================
            4. UI 引用
            ============================================================ */
-        // 初始阈值取 e200 的中位数，让初始图表展示一个合理的混合策略
+        // 初始阈值：选 avgGift 最接近 210（即 21 天一个角色）的 T
         const e200Sorted = model.map(r => r.e200).filter(v => v > 0).sort((a, b) => a - b);
         let currentT = e200Sorted.length > 0 ? e200Sorted[Math.floor(e200Sorted.length * 0.25)] : 0;
+        {
+            const allT = new Set([0]);
+            model.forEach(r => { allT.add(r.e200); allT.add(r.e400); });
+            const Tvalues = Array.from(allT).sort((a, b) => a - b);
+            let bestT = currentT, bestDiff = Infinity;
+            Tvalues.forEach(T => {
+                let totalGift = 0;
+                model.forEach(r => {
+                    const choice = T >= r.e400 ? 400 : T >= r.e200 ? 200 : 100;
+                    totalGift += Math.ceil(54100 / choice);
+                });
+                const avgGift = totalGift / model.length;
+                const diff = Math.abs(avgGift - 210);
+                if (diff < bestDiff) { bestDiff = diff; bestT = T; }
+            });
+            currentT = bestT;
+        }
         const tbody = document.getElementById("tbody");
         const rolesDiv = document.getElementById("roles");
         const toggleRaw = document.getElementById("toggleRaw");
@@ -1919,7 +1936,6 @@
             function y(p) { return pad.top + ph - (p.avgCost - minCost) / rangeCost * ph; }
 
             // Chart title
-            html += `<text x="${W / 2}" y="18" text-anchor="middle" font-size="13" fill="${c.axisTitle}" font-weight="500">礼物次数 · 方斯消耗 权衡曲线</text>`;
 
             // Grid lines (horizontal)
             for (let i = 0; i <= 5; i++) {
@@ -2045,10 +2061,9 @@
                 const n = near;
                 chartTooltip.innerHTML = `
                     人均方斯：<strong>${formatNumber(Math.round(n.avgCost))}</strong><br>
-                    人均礼物：<strong>${Math.round(n.avgGift)}</strong><br>
-                    平均每个礼物好感：<strong>${Math.round(n.avgFavorPerGift)}</strong><br>
+                    人均所需礼物数：<strong>${Math.round(n.avgGift)}</strong><br>
                     总方斯：<strong>${formatNumber(n.totalCost)}</strong><br>
-                    总礼物：<strong>${n.totalGift}</strong>
+                    ${n.T} 方斯减少一件礼物
                 `;
                 const parent = chartTooltip.parentElement;
                 const pr = parent.getBoundingClientRect();
@@ -2211,7 +2226,9 @@
             drawChart(curvePoints);
 
             // 更新曲线信息行
-            chartInfo.innerHTML = `我愿意用 <strong>${T}</strong> 方斯减少一件礼物`;
+            const cp = curvePoints.find(p => p.T === currentT) || curvePoints[0];
+            const daysPerChar = cp ? (cp.avgGift / 10).toFixed(1) : '--';
+            chartInfo.innerHTML = `平均 <strong>${daysPerChar}</strong> 天一个角色（人均所需礼物数 / 10）`;
 
             // 更新最佳角色卡
             const matched = selected.filter(r => r.e200 === T || r.e400 === T);
