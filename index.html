@@ -2412,8 +2412,7 @@
             const totalCost = count * t.price;
 
             html += `<div class="result-main">`;
-            html += `<strong>${count}</strong> 个`;
-            html += `<span style="font-weight:400;font-size:14px;color:#5a6a8a;margin-left:8px;">（${t.tier} 档 ${t.name}）</span>`;
+            html += `${t.name}：${count} 个`;
             html += `</div>`;
 
             gcResult.innerHTML = html;
