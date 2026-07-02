@@ -1223,3 +1223,400 @@ thead tr.group th.raw-group-header.hidden-raw {
         color: #81c784;
     }
 }
+
+/* ============================================================
+   视图切换 Tab
+   ============================================================ */
+.view-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.view-tab {
+    padding: 10px 28px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    background: #eef2f8;
+    color: #5a6a8a;
+    border: 1px solid transparent;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.view-tab:hover {
+    background: #dce4f0;
+    color: #3a4a6a;
+}
+
+.view-tab.active {
+    background: #1a3a6a;
+    color: #fff;
+    border-color: #1a3a6a;
+}
+
+.view-hidden {
+    display: none !important;
+}
+
+/* ===== 策略数量指示 ===== */
+.strategy-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.strategy-count {
+    background: #1a3a6a;
+    color: white;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.strategy-hint {
+    font-size: 14px;
+    color: #8a9ab8;
+}
+
+/* ===== 策略容器 ===== */
+.strategies-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ===== 策略卡片 ===== */
+.strategy-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 2px solid #8a9ab8;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.strategy-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+}
+
+.strategy-header {
+    background: #f6f8fc;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e8ecf4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px 24px;
+}
+
+.strategy-header .t-label {
+    font-size: 14px;
+    color: #6a7a9a;
+    font-weight: 400;
+}
+
+.strategy-header .t-value {
+    font-size: 17px;
+    font-weight: 500;
+    color: #1a3a6a;
+    background: #e8ecf8;
+    padding: 2px 16px;
+    border-radius: 20px;
+}
+
+.strategy-header .stat-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #3a4a6a;
+}
+
+.strategy-header .stat-group span strong {
+    color: #1a3a6a;
+    font-weight: 500;
+}
+
+.strategy-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.strategy-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 700px;
+    line-height: 1.6;
+    border: 1px solid #d6deec;
+}
+
+.strategy-body thead th {
+    background: #eef2f8;
+    color: #1a2a4a;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border-right: 1px solid #d6deec;
+    border-bottom: 2px solid #c8d2e4;
+    white-space: nowrap;
+}
+
+.strategy-body thead th:last-child {
+    border-right: none;
+}
+
+.strategy-body tbody td {
+    border-bottom: 1px solid #eef2f8;
+    padding: 9px 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    background: white;
+    transition: background 0.12s;
+}
+
+.strategy-body tbody tr:hover td {
+    background: #f6faff;
+}
+
+.strategy-body tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== 策略备注（触发角色） ===== */
+.strategy-note {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #4a5e7a;
+    background: #fafbfd;
+    border-top: 1px solid #e8ecf4;
+    line-height: 1.8;
+}
+
+.trigger-tag {
+    display: inline-block;
+    background: #e8ecf8;
+    color: #1a3a6a;
+    padding: 1px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 2px;
+}
+
+/* ===== 策略表格列样式 ===== */
+.strategy-body .col-role {
+    font-weight: 500;
+    color: #0f1f3a;
+    white-space: nowrap;
+    font-size: 15px;
+}
+
+.strategy-body .col-choice {
+    font-weight: 500;
+    color: #1a3a6a;
+    font-size: 15px;
+}
+
+.strategy-body .col-giftname {
+    font-size: 13px;
+    color: #1f3a6a;
+    white-space: nowrap;
+}
+
+.strategy-body .col-location {
+    font-size: 13px;
+    color: #4a5e7a;
+    white-space: nowrap;
+}
+
+.strategy-body .col-gift {
+    font-weight: 500;
+    color: #0f3b6a;
+}
+
+.strategy-body .col-cost {
+    font-weight: 500;
+    color: #0f3b6a;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.2px;
+}
+
+/* ===== 空状态 ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8a9ab8;
+    font-size: 16px;
+}
+
+/* ===== 策略滚动条 ===== */
+.strategy-body::-webkit-scrollbar {
+    height: 6px;
+}
+
+.strategy-body::-webkit-scrollbar-track {
+    background: #eef2f8;
+    border-radius: 3px;
+}
+
+.strategy-body::-webkit-scrollbar-thumb {
+    background: #c8d2e4;
+    border-radius: 3px;
+}
+
+.strategy-body::-webkit-scrollbar-thumb:hover {
+    background: #a8b6d0;
+}
+
+/* ===== 截图按钮 ===== */
+.btn-screenshot {
+    background: #1a3a6a;
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.btn-screenshot:hover {
+    background: #0f2a4e;
+    transform: translateY(-1px);
+}
+
+.btn-screenshot:active {
+    transform: scale(0.96);
+}
+
+/* ===== 策略暗色模式 ===== */
+@media (prefers-color-scheme: dark) {
+    .view-tab {
+        background: #2a2d3e;
+        color: #8a8ea8;
+        border-color: #3a3d50;
+    }
+
+    .view-tab:hover {
+        background: #32354a;
+        color: #a0a8c0;
+    }
+
+    .view-tab.active {
+        background: #4a7acc;
+        color: #fff;
+        border-color: #4a7acc;
+    }
+
+    .strategy-card {
+        background: #252836;
+        border-color: #4a4e65;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .strategy-card:hover {
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+
+    .strategy-header {
+        background: #2a2d3e;
+        border-bottom-color: #3a3d50;
+    }
+
+    .strategy-header .t-label {
+        color: #8a8ea8;
+    }
+
+    .strategy-header .t-value {
+        color: #a0b8e0;
+        background: #32354a;
+    }
+
+    .strategy-header .stat-group {
+        color: #a0a8c0;
+    }
+
+    .strategy-header .stat-group span strong {
+        color: #c0c8e0;
+    }
+
+    .strategy-body table {
+        border-color: #3a3d50;
+    }
+
+    .strategy-body thead th {
+        background: #2a2d3e;
+        color: #c0c4d8;
+        border-right-color: #3a3d50;
+        border-bottom-color: #4a4e65;
+    }
+
+    .strategy-body tbody td {
+        background: #252836;
+        border-bottom-color: #333648;
+    }
+
+    .strategy-body tbody tr:hover td {
+        background: #2a2e40;
+    }
+
+    .strategy-body .col-role {
+        color: #d0d6e8;
+    }
+
+    .strategy-body .col-choice {
+        color: #a0b8e0;
+    }
+
+    .strategy-body .col-giftname {
+        color: #a0b0d0;
+    }
+
+    .strategy-body .col-location {
+        color: #9098b0;
+    }
+
+    .strategy-body .col-gift,
+    .strategy-body .col-cost {
+        color: #a0b8e0;
+    }
+
+    .strategy-note {
+        background: #2a2d3e;
+        border-top-color: #3a3d50;
+        color: #9098b0;
+    }
+
+    .trigger-tag {
+        background: #32354a;
+        color: #a0b8e0;
+    }
+
+    .strategy-summary-bar .strategy-hint {
+        color: #7a7e98;
+    }
+
+    .strategy-body::-webkit-scrollbar-track {
+        background: #2a2d3e;
+    }
+
+    .strategy-body::-webkit-scrollbar-thumb {
+        background: #4a4e65;
+    }
+
+    .strategy-body::-webkit-scrollbar-thumb:hover {
+        background: #5a5e78;
+    }
+}
