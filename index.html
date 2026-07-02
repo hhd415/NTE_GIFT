@@ -1655,12 +1655,15 @@
                     totalCost += Math.ceil(gift * price);
                 });
                 const n = selectedModel.length;
+                const avgGift = totalGift / n;
+                const avgCost = totalCost / n;
                 points.push({
                     T,
-                    avgGift: totalGift / n,
-                    avgCost: totalCost / n,
+                    avgGift,
+                    avgCost,
                     totalGift,
-                    totalCost
+                    totalCost,
+                    avgFavorPerGift: 54100 / avgGift
                 });
             });
             return points;
@@ -1860,6 +1863,7 @@
                 chartTooltip.innerHTML = `
                     人均方斯：<strong>${formatNumber(Math.round(n.avgCost))}</strong><br>
                     人均礼物：<strong>${Math.round(n.avgGift)}</strong><br>
+                    平均每个礼物好感：<strong>${Math.round(n.avgFavorPerGift)}</strong><br>
                     总方斯：<strong>${formatNumber(n.totalCost)}</strong><br>
                     总礼物：<strong>${n.totalGift}</strong>
                 `;
