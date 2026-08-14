@@ -214,13 +214,37 @@ const data = [{
     name: "真红",
     name100: "噗卡巧克力「绘莉巡演纪念款」",
     c100: 1050,
-    l100: "噗卡糖果专卖售货机/噗卡糖果店(桥间地)",
+    l100: "噗卡糖果店(桥间地)",
     name200: "黄金泉",
     c200: 7500,
     l200: "伊波恩古董店传送点",
     name400: "暴走棉绒绒-强者之证",
     c400: 12000,
     l400: "DSD潮玩店(桥间地)",
+    hasSkin: true
+}, {
+    name: "伊洛伊",
+    name100: "噗卡好梦棉花糖",
+    c100: 660,
+    l100: "噗卡糖果店(桥间地)",
+    name200: "灿烂之约",
+    c200: 4500,
+    l200: "集山忘野花店(绘空町)",
+    name400: "几何夜",
+    c400: 10000,
+    l400: "Oops!Chest礼品店(绘空町)",
+    hasSkin: true
+}, {
+    name: "残虹",
+    name100: "时令寿司船",
+    c100: 600,
+    l100: "卜多力居酒屋(桥间地)",
+    name200: "小夜曲",
+    c200: 3000,
+    l200: "集山忘野花店(绘空町)",
+    name400: "融月茶具",
+    c400: 15000,
+    l400: "Oops!Chest礼品店(米格尔区)",
     hasSkin: true
     }
 
@@ -257,6 +281,12 @@ function formatNumber(num) {
     return Math.round(num)
         .toString()
         .replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+}
+
+function choose(r, T) {
+    if (r.e400 <= T) return 400;
+    if (r.e200 <= T) return 200;
+    return 100;
 }
 
 function getPrice(r, t) {

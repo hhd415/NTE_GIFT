@@ -1,7 +1,6 @@
 /* ============================================================
    数据 & 工具函数来自 common.js（data, model, buildModel,
-   formatNumber, getPrice, getGiftName, getLocation, parseLocation）
-   最优算法来自 mixed.js（MIXED_ALGO：混合礼物 Pareto 前沿）
+   formatNumber, choose, getPrice, getGiftName, getLocation, parseLocation）
    ============================================================ */
 
 /* ============================================================
@@ -56,6 +55,26 @@ measureGiftNameColumn();
 /* ============================================================
    4. UI 引用
    ============================================================ */
+// 初始阈值：选 avgGift 最接近 210（即 21 天一个角色）的 T
+const e200Sorted = model.map(r => r.e200).filter(v => v > 0).sort((a, b) => a - b);
+let currentT = e200Sorted.length > 0 ? e200Sorted[Math.floor(e200Sorted.length * 0.25)] : 0;
+{
+    const allT = new Set([0]);
+    model.forEach(r => { allT.add(r.e200); allT.add(r.e400); });
+    const Tvalues = Array.from(allT).sort((a, b) => a - b);
+    let bestT = currentT, bestDiff = Infinity;
+    Tvalues.forEach(T => {
+        let totalGift = 0;
+        model.forEach(r => {
+            const choice = T >= r.e400 ? 400 : T >= r.e200 ? 200 : 100;
+            totalGift += Math.ceil(54100 / choice);
+        });
+        const avgGift = totalGift / model.length;
+        const diff = Math.abs(avgGift - 210);
+        if (diff < bestDiff) { bestDiff = diff; bestT = T; }
+    });
+    currentT = bestT;
+}
 const tbody = document.getElementById("tbody");
 const rolesDiv = document.getElementById("roles");
 const toggleRaw = document.getElementById("toggleRaw");
@@ -66,52 +85,8 @@ const skinBadge = document.getElementById("skinBadge");
 const chartSvg = document.getElementById("chartSvg");
 const chartInfo = document.getElementById("chartInfo");
 const chartTooltip = document.getElementById("chartTooltip");
+const bestCharsCard = document.getElementById("bestCharsCard");
 const bestCharsContent = document.getElementById("bestCharsContent");
-const strategiesContainer = document.getElementById("strategiesContainer");
-const strategyCountEl = document.getElementById("strategyCount");
-
-/* ============================================================
-   2. 曲线状态（混合礼物最优曲线）
-   ============================================================ */
-let curve = null;          // MIXED_ALGO.buildCurve 的结果（缓存）
-let currentIdx = 0;        // 当前选中曲线点下标
-let lastSelectedKey = '';  // 曲线缓存 key（由角色选择决定）
-
-const DEFAULT_AVG_GIFT = 210; // 默认选中约 21 天一个角色
-
-function getSelectedModel() {
-    const sel = [];
-    model.forEach((r, i) => {
-        const cb = document.getElementById("r" + i);
-        if (cb && cb.checked) sel.push(r);
-    });
-    return sel;
-}
-
-function pickIndexNear(avgGift) {
-    const pts = curve ? curve.points : [];
-    if (pts.length === 0) return -1;
-    let best = 0, bd = Infinity;
-    pts.forEach((p, i) => {
-        const d = Math.abs(p.avgGift - avgGift);
-        if (d < bd) { bd = d; best = i; }
-    });
-    return best;
-}
-
-function ensureCurve() {
-    const sel = getSelectedModel();
-    const key = sel.map(r => r.name).join(',');
-    if (!curve || key !== lastSelectedKey) {
-        const prevAvg = (curve && currentIdx >= 0 && currentIdx < curve.points.length)
-            ? curve.points[currentIdx].avgGift
-            : DEFAULT_AVG_GIFT;
-        curve = MIXED_ALGO.buildCurve(sel);
-        lastSelectedKey = key;
-        currentIdx = pickIndexNear(prevAvg);
-    }
-    return curve;
-}
 
 /* ============================================================
    3. 工具函数（index.html 专用）
@@ -132,11 +107,6 @@ function splitGiftName(name, isMobile) {
     const before = name.substring(0, idx);
     const after = name.substring(idx); // 包含 "-"
     return `${before}<br>${after}`;
-}
-
-// 档位徽标
-function tierBadge(t) {
-    return `<span class="tier-badge tier-${t}">${t}档</span>`;
 }
 
 /* ============================================================
@@ -204,76 +174,45 @@ loadPreferences();
 applyFoldState();
 
 /* ============================================================
-   5. 主表格渲染（混合礼物）
+   8. 曲线数据计算 & 绘图
    ============================================================ */
-function renderMainTable(plan, isMobile) {
-    const rows = [];
-    plan.forEach(r => {
-        const span = r.gifts.length;
-        // 地点：仅在该角色内部合并相邻同店
-        const locRows = r.gifts.map(g => g.location);
-        const locSpan = new Array(span).fill(1);
-        for (let i = span - 2; i >= 0; i--) {
-            if (locRows[i] === locRows[i + 1]) { locSpan[i] = locSpan[i + 1] + 1; locSpan[i + 1] = 0; }
-        }
-        r.gifts.forEach((g, gi) => {
-            const giftNameDisplay = splitGiftName(g.name, isMobile);
-            let locationDisplay = g.location;
-            if (isMobile) {
-                const parts = splitLocation(g.location);
-                locationDisplay = parts.area ? `${parts.name}<br>${parts.area}` : parts.name;
-            }
-            const locCell = locSpan[gi] > 0
-                ? `<td class="col-location" rowspan="${locSpan[gi]}">${locationDisplay}</td>`
-                : '';
-            const roleCell = gi === 0
-                ? `<td class="col-role" rowspan="${span}">${r.name}</td>`
-                : '';
-            const rawCells = gi === 0
-                ? `<td class="raw-col" rowspan="${span}">${r.c100}</td>
-                   <td class="raw-col" rowspan="${span}">${r.c200}</td>
-                   <td class="raw-col" rowspan="${span}">${r.c400}</td>
-                   <td class="raw-col" rowspan="${span}">${r.e200}</td>
-                   <td class="raw-col" rowspan="${span}">${r.e400}</td>`
-                : '';
-            const totalCells = gi === 0
-                ? `<td class="col-gift" rowspan="${span}">${r.G}</td>
-                   <td class="col-cost" rowspan="${span}">${formatNumber(r.C)}</td>`
-                : '';
-            rows.push(`
-                            <tr>
-                                ${roleCell}
-                                ${rawCells}
-                                <td class="col-tier">${tierBadge(g.tier)}</td>
-                                <td class="col-giftname">${giftNameDisplay}</td>
-                                <td class="col-gift">${g.count}</td>
-                                ${locCell}
-                                <td class="col-cost">${formatNumber(g.subtotal)}</td>
-                                ${totalCells}
-                            </tr>`);
+function computeCurveData(selectedModel) {
+    if (selectedModel.length === 0) return [];
+
+    // 收集所有 e200、e400 作为阈值候选
+    const thresholds = new Set();
+    thresholds.add(0);
+    selectedModel.forEach(r => {
+        thresholds.add(r.e200);
+        thresholds.add(r.e400);
+    });
+    const Tvalues = Array.from(thresholds).sort((a, b) => a - b);
+
+    const points = [];
+    Tvalues.forEach(T => {
+        let totalGift = 0, totalCost = 0;
+        selectedModel.forEach(r => {
+            const choice = choose(r, T);
+            const price = getPrice(r, choice);
+            const gift = Math.ceil(54100 / choice);
+            totalGift += gift;
+            totalCost += Math.ceil(gift * price);
+        });
+        const n = selectedModel.length;
+        const avgGift = totalGift / n;
+        const avgCost = totalCost / n;
+        points.push({
+            T,
+            avgGift,
+            avgCost,
+            totalGift,
+            totalCost,
+            avgFavorPerGift: 54100 / avgGift
         });
     });
-    tbody.innerHTML = rows.join('');
+    return points;
 }
 
-/* ============================================================
-   5.5 当前方案组成卡
-   ============================================================ */
-function renderPlanSummary(plan, point) {
-    let n100 = 0, n200 = 0, n400 = 0;
-    plan.forEach(r => { n100 += r.c; n200 += r.b; n400 += r.a; });
-    const total = n100 + n200 + n400;
-    const pct = v => total ? ((v / total) * 100).toFixed(0) + '%' : '0%';
-    bestCharsContent.innerHTML = `
-        共 <strong>${formatNumber(point.totalGift)}</strong> 件礼物 · 人均方斯 <strong>${formatNumber(Math.round(point.avgCost))}</strong><br>
-        <span class="mix-badge mix-400">400档 ${formatNumber(n400)} 件（${pct(n400)}）</span>
-        <span class="mix-badge mix-200">200档 ${formatNumber(n200)} 件（${pct(n200)}）</span>
-        <span class="mix-badge mix-100">100档 ${formatNumber(n100)} 件（${pct(n100)}）</span>`;
-}
-
-/* ============================================================
-   8. 曲线绘图
-   ============================================================ */
 function isDarkMode() {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
@@ -340,6 +279,8 @@ function drawChart(curvePoints) {
     function x(p) { return pad.left + (p.avgGift - minGift) / rangeGift * pw; }
     function y(p) { return pad.top + ph - (p.avgCost - minCost) / rangeCost * ph; }
 
+    // Chart title
+
     // Grid lines (horizontal)
     for (let i = 0; i <= 5; i++) {
         const gy = pad.top + ph * i / 5;
@@ -374,13 +315,20 @@ function drawChart(curvePoints) {
     // X axis title
     html += `<text x="${W / 2}" y="${H - 6}" text-anchor="middle" font-size="12" fill="${c.axisTitle}" font-weight="500">平均礼物次数 →</text>`;
 
-    // 最优曲线折线（连接全部 Pareto 点）
-    const d = curvePoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p).toFixed(1)},${y(p).toFixed(1)}`).join(' ');
-    html += `<path d="${d}" fill="none" stroke="${c.dot}" stroke-width="1.5" opacity="0.75"/>`;
+    // 散点标记
+    curvePoints.forEach(p => {
+        html += `<circle cx="${x(p).toFixed(1)}" cy="${y(p).toFixed(1)}" r="3.5" fill="${c.dot}" opacity="0.55"/>`;
+    });
 
-    // 当前可拖拽圆点
-    if (currentIdx >= 0 && currentIdx < curvePoints.length) {
-        const cp = curvePoints[currentIdx];
+    // Current draggable handle — 精确匹配或取最近阈值
+    let cp = curvePoints.find(p => p.T === currentT);
+    if (!cp && curvePoints.length > 0) {
+        cp = curvePoints.reduce((best, p) =>
+            Math.abs(p.T - currentT) < Math.abs(best.T - currentT) ? p : best
+        );
+        currentT = cp.T;
+    }
+    if (cp) {
         html += `<circle cx="${x(cp).toFixed(1)}" cy="${y(cp).toFixed(1)}" r="11" fill="${c.handleFill}" stroke="${c.handleStroke}" stroke-width="3" id="dragHandle"/>`;
     }
 
@@ -392,7 +340,7 @@ function drawChart(curvePoints) {
     svg._y = y;
     svg._pad = pad;
 
-    return curvePoints[currentIdx] || null;
+    return cp;
 }
 
 /* ============================================================
@@ -446,12 +394,9 @@ function setupChartDrag() {
     }
 
     function snapTo(near) {
-        if (near) {
-            const idx = chartSvg._curvePoints.indexOf(near);
-            if (idx !== -1 && idx !== currentIdx) {
-                currentIdx = idx;
-                update();
-            }
+        if (near && near.T !== currentT) {
+            currentT = near.T;
+            update();
         }
     }
 
@@ -461,15 +406,15 @@ function setupChartDrag() {
         chartTooltip.innerHTML = `
             人均方斯：<strong>${formatNumber(Math.round(n.avgCost))}</strong><br>
             人均所需礼物数：<strong>${Math.round(n.avgGift)}</strong><br>
-            平均天数：<strong>${(n.avgGift / MIXED_ALGO.GIFTS_PER_DAY).toFixed(1)}</strong><br>
-            总方斯：<strong>${formatNumber(n.totalCost)}</strong>
+            总方斯：<strong>${formatNumber(n.totalCost)}</strong><br>
+            ${n.T} 方斯减少一件礼物
         `;
         const parent = chartTooltip.parentElement;
         const pr = parent.getBoundingClientRect();
         let left = screenX - pr.left + 14;
         let top = screenY - pr.top - 14;
         if (left + 170 > pr.width) left = screenX - pr.left - 185;
-        if (top + 120 > pr.height) top = screenY - pr.top - 135;
+        if (top + 100 > pr.height) top = screenY - pr.top - 125;
         if (left < 0) left = 4;
         if (top < 0) top = 4;
         chartTooltip.style.left = left + 'px';
@@ -539,35 +484,104 @@ setupChartDrag();
    10. 主更新逻辑
    ============================================================ */
 function update() {
-    const cv = ensureCurve();
+
+    const T = currentT;
     const isMobile = window.innerWidth < 900;
 
-    if (cv.points.length === 0) {
-        tbody.innerHTML = '';
-        drawChart([]);
-        chartInfo.innerHTML = '请至少选择一个角色';
-        bestCharsContent.innerHTML = '请选择角色后查看混合礼物最优方案';
-        return;
+    const selected = [];
+    model.forEach((r, i) => {
+        const cb = document.getElementById("r" + i);
+        if (cb && cb.checked) {
+            const choice = choose(r, T);
+            const location = getLocation(r, choice);
+            const price = getPrice(r, choice);
+            const giftName = getGiftName(r, choice);
+            const gift = Math.ceil(54100 / choice);
+            const cost = Math.ceil(gift * price);
+            selected.push({
+                ...r,
+                choice,
+                location,
+                price,
+                giftName,
+                gift,
+                cost
+            });
+        }
+    });
+
+    // 地点排序
+    selected.sort((a, b) => {
+        const pa = parseLocation(a.location);
+        const pb = parseLocation(b.location);
+        const areaComp = pa.area.localeCompare(pb.area, undefined, { sensitivity: 'base' });
+        if (areaComp !== 0) return areaComp;
+        return pa.name.localeCompare(pb.name, undefined, { sensitivity: 'base' });
+    });
+
+    // 渲染表格（含地点合并）
+    const rowspans = new Array(selected.length).fill(1);
+    for (let i = selected.length - 2; i >= 0; i--) {
+        if (selected[i].location === selected[i + 1].location) {
+            rowspans[i] = rowspans[i + 1] + 1;
+            rowspans[i + 1] = 0;
+        }
     }
 
-    if (currentIdx < 0 || currentIdx >= cv.points.length) currentIdx = 0;
-    const point = cv.points[currentIdx];
-    const plan = cv.reconstruct(point.totalGift);
+    const rows = [];
+    selected.forEach((r, idx) => {
+        let locationDisplay;
+        if (isMobile) {
+            const parts = splitLocation(r.location);
+            locationDisplay = parts.area ? `${parts.name}<br>${parts.area}` : parts.name;
+        } else {
+            locationDisplay = r.location;
+        }
 
-    renderMainTable(plan, isMobile);
+        const giftNameDisplay = splitGiftName(r.giftName, isMobile);
+
+        const rowspan = rowspans[idx];
+        const locationCell = rowspan > 0
+            ? `<td class="col-location" rowspan="${rowspan}">${locationDisplay}</td>`
+            : '';
+
+        rows.push(`
+                            <tr>
+                                <td class="col-role">${r.name}</td>
+                                <td class="raw-col">${r.c100}</td>
+                                <td class="raw-col">${r.c200}</td>
+                                <td class="raw-col">${r.c400}</td>
+                                <td class="raw-col">${r.e200}</td>
+                                <td class="raw-col">${r.e400}</td>
+                                <td class="col-choice">${r.choice}</td>
+                                ${locationCell}
+                                <td class="col-giftname">${giftNameDisplay}</td>
+                                <td class="col-gift">${r.gift}</td>
+                                <td class="col-cost">${formatNumber(r.cost)}</td>
+                            </tr>`);
+    });
+    tbody.innerHTML = rows.join('');
 
     // 折叠状态
     applyFoldState();
 
     // 更新曲线图
-    drawChart(cv.points);
+    const curvePoints = computeCurveData(selected);
+    drawChart(curvePoints);
 
     // 更新曲线信息行
-    const days = point.avgGift / MIXED_ALGO.GIFTS_PER_DAY;
-    chartInfo.innerHTML = `平均 <strong>${days.toFixed(1)}</strong> 天一个角色（人均所需礼物数 / 10）`;
+    const cp = curvePoints.find(p => p.T === currentT) || curvePoints[0];
+    const daysPerChar = cp ? (cp.avgGift / 10).toFixed(1) : '--';
+    chartInfo.innerHTML = `平均 <strong>${daysPerChar}</strong> 天一个角色（人均所需礼物数 / 10）`;
 
-    // 更新当前方案组成卡
-    renderPlanSummary(plan, point);
+    // 更新最佳角色卡
+    const matched = selected.filter(r => r.e200 === T || r.e400 === T);
+    if (matched.length > 0) {
+        const names = matched.map(r => `<strong>${r.name}</strong>`).join('、');
+        bestCharsContent.innerHTML = `当前阈值 <strong>${T}</strong> 方斯对应的角色：${names}`;
+    } else {
+        bestCharsContent.innerHTML = `当前阈值 <strong>${T}</strong> 方斯无精确匹配角色，拖拽图表圆点以查看对应角色`;
+    }
 }
 
 /* ============================================================
@@ -687,7 +701,7 @@ darkModeQuery.addEventListener('change', function() {
 });
 
 /* ============================================================
-   14. 补礼物计算（按当前混合方案比例分摊）
+   14. 补礼物计算
    ============================================================ */
 const LEVEL_XP = [100, 500, 1000, 2000, 3500, 5000, 7000, 9000, 12000, 16000];
 const CUMULATIVE_XP = (() => {
@@ -761,36 +775,27 @@ function updateGiftCalc() {
         xpAbove9 = remainingTotal;
     }
 
-    // 读取当前曲线方案中该角色的混合礼物组合
-    let gifts = null;
-    if (curve && curve.points.length > 0) {
-        const idx = (currentIdx >= 0 && currentIdx < curve.points.length) ? currentIdx : 0;
-        const plan = curve.reconstruct(curve.points[idx].totalGift);
-        const entry = plan.find(p => p.name === r.name);
-        if (entry && entry.gifts.length > 0) gifts = entry.gifts;
-    }
-    // 兜底：该角色不在当前选择中 → 用最便宜的 100 档
-    if (!gifts) {
-        gifts = [{ tier: 100, count: Math.ceil(MAX_XP / 100), name: r.name100, price: r.c100 }];
-    }
-
-    const planFavor = gifts.reduce((s, g) => s + g.tier * g.count, 0);
-    const effectiveFavor = xpBelow9 / 1.05 + xpAbove9; // 需要的等效好感
-    const lines = gifts.map(g => {
-        const count = Math.max(0, Math.ceil(effectiveFavor * g.count / planFavor));
-        return { tier: g.tier, name: g.name, price: g.price, count };
-    }).filter(g => g.count > 0);
-    const totalCount = lines.reduce((s, g) => s + g.count, 0);
-    const totalCost = lines.reduce((s, g) => s + g.count * g.price, 0);
+    // 读取上方方案：根据当前阈值 T 确定最优礼物档次
+    const optimalTier = choose(r, currentT);
 
     let html = '';
     if (xpBelow9 > 0) {
-        html += `<div class="result-sub">✨ ≤8级部分 ${formatNumber(xpBelow9)} 经验享受 +5% 好感(可能有1个礼物的误差)</div>`;
+        html += `<div class="result-sub">✨ ≤8级部分 ${formatNumber(xpBelow9)} 经验享受 +5% 好感(可能有一个礼物的误差)</div>`;
     }
-    lines.forEach(g => {
-        html += `<div class="result-main">${g.name}：${g.count} 个</div>`;
-    });
-    html += `<div class="result-sub">合计 ${totalCount} 件 · 共 ${formatNumber(totalCost)} 方斯</div>`;
+    const tiers = [
+        { tier: 100, favorBonus: 105, favorBase: 100, price: r.c100, name: r.name100 },
+        { tier: 200, favorBonus: 210, favorBase: 200, price: r.c200, name: r.name200 },
+        { tier: 400, favorBonus: 420, favorBase: 400, price: r.c400, name: r.name400 },
+    ];
+    const t = tiers.find(t => t.tier === optimalTier);
+    const countBonus = xpBelow9 > 0 ? Math.ceil(xpBelow9 / t.favorBonus) : 0;
+    const countBase = xpAbove9 > 0 ? Math.ceil(xpAbove9 / t.favorBase) : 0;
+    const count = countBonus + countBase;
+    const totalCost = count * t.price;
+
+    html += `<div class="result-main">`;
+    html += `${t.name}：${count} 个`;
+    html += `</div>`;
 
     gcResult.innerHTML = html;
 }
@@ -815,13 +820,70 @@ if (typeof model !== 'undefined' && model.length > 0) {
 }
 
 /* ============================================================
-   15. 方案对比视图（里程碑最省方案 + 地点购物清单）
+   15. 方案对比视图
    ============================================================ */
-let strategiesCacheKey = '';
+const strategiesContainer = document.getElementById("strategiesContainer");
+const strategyCountEl = document.getElementById("strategyCount");
 
-function computeStrategies() {
-    if (!curve || curve.points.length === 0) return [];
-    return MIXED_ALGO.buildMilestoneStrategies(curve);
+function computeStrategies(selectedModel) {
+    if (selectedModel.length === 0) return [];
+
+    const thresholds = new Set();
+    thresholds.add(0);
+    selectedModel.forEach(r => {
+        thresholds.add(r.e200);
+        thresholds.add(r.e400);
+    });
+    const Tvalues = Array.from(thresholds).sort((a, b) => a - b);
+
+    const strategies = [];
+    let prevKey = null;
+
+    Tvalues.forEach(T => {
+        const unsorted = selectedModel.map(r => {
+            const choice = choose(r, T);
+            const price = getPrice(r, choice);
+            const giftName = getGiftName(r, choice);
+            const location = getLocation(r, choice);
+            const gift = Math.ceil(54100 / choice);
+            const cost = Math.ceil(gift * price);
+            return { ...r, choice, price, giftName, location, gift, cost };
+        });
+
+        unsorted.sort((a, b) => {
+            const pa = parseLocation(a.location);
+            const pb = parseLocation(b.location);
+            const areaComp = pa.area.localeCompare(pb.area, undefined, { sensitivity: 'base' });
+            if (areaComp !== 0) return areaComp;
+            return pa.name.localeCompare(pb.name, undefined, { sensitivity: 'base' });
+        });
+
+        const key = unsorted.map(r => r.choice).join(',');
+        if (key === prevKey) return;
+        prevKey = key;
+
+        let totalGift = 0, totalCost = 0;
+        unsorted.forEach(r => { totalGift += r.gift; totalCost += r.cost; });
+        const n = selectedModel.length;
+
+        const triggerChars = [];
+        selectedModel.forEach(r => {
+            if (r.e200 === T) triggerChars.push({ name: r.name, from: 100, to: 200 });
+            if (r.e400 === T) triggerChars.push({ name: r.name, from: 200, to: 400 });
+        });
+
+        strategies.push({
+            T,
+            rows: unsorted,
+            avgGift: totalGift / n,
+            avgCost: totalCost / n,
+            totalGift,
+            totalCost,
+            triggerChars
+        });
+    });
+
+    return strategies;
 }
 
 function renderStrategies(strategies) {
@@ -835,59 +897,38 @@ function renderStrategies(strategies) {
 
     let html = '<div class="strategies-grid">';
 
-    strategies.forEach(strat => {
-        // 按地点聚合成购物清单
-        const byLoc = new Map();
-        strat.plan.forEach(r => {
-            r.gifts.forEach(g => {
-                let loc = byLoc.get(g.location);
-                if (!loc) {
-                    const pl = parseLocation(g.location);
-                    loc = { area: pl.area, name: pl.name, rows: [] };
-                    byLoc.set(g.location, loc);
-                }
-                let row = loc.rows.find(x => x.tier === g.tier && x.name === g.name);
-                if (!row) {
-                    row = { tier: g.tier, name: g.name, price: g.price, count: 0, subtotal: 0, chars: [] };
-                    loc.rows.push(row);
-                }
-                row.count += g.count;
-                row.subtotal += g.subtotal;
-                row.chars.push(r.name);
-            });
-        });
+    strategies.forEach((strat, idx) => {
+        const rows = strat.rows;
+        const rowspans = new Array(rows.length).fill(1);
+        for (let i = rows.length - 2; i >= 0; i--) {
+            if (rows[i].location === rows[i + 1].location) {
+                rowspans[i] = rowspans[i + 1] + 1;
+                rowspans[i + 1] = 0;
+            }
+        }
 
-        const locs = Array.from(byLoc.values()).sort((a, b) => {
-            const areaComp = a.area.localeCompare(b.area, undefined, { sensitivity: 'base' });
-            if (areaComp !== 0) return areaComp;
-            return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-        });
+        const tableRows = rows.map((r, i) => {
+            const rowspan = rowspans[i];
+            const locationCell = rowspan > 0
+                ? `<td class="col-location" rowspan="${rowspan}">${r.location}</td>`
+                : '';
 
-        let bodyRows = '';
-        locs.forEach(loc => {
-            const span = loc.rows.length;
-            loc.rows.forEach((row, i) => {
-                const locCell = i === 0
-                    ? `<td class="col-location" rowspan="${span}">${loc.area ? `${loc.name}(${loc.area})` : loc.name}</td>`
-                    : '';
-                const recipients = row.chars.join('、');
-                bodyRows += `
-                            <tr>
-                                ${locCell}
-                                <td class="col-tier">${tierBadge(row.tier)}</td>
-                                <td class="col-giftname">${row.name}<br><span class="gift-recipients">送给：${recipients}</span></td>
-                                <td class="col-gift">${row.count}</td>
-                                <td class="col-price">${formatNumber(row.price)}</td>
-                                <td class="col-cost">${formatNumber(row.subtotal)}</td>
-                            </tr>`;
-            });
-        });
+            return `
+                        <tr>
+                            <td class="col-role">${r.name}</td>
+                            <td class="col-choice">${r.choice}</td>
+                            <td class="col-giftname">${r.giftName}</td>
+                            ${locationCell}
+                            <td class="col-gift">${r.gift}</td>
+                            <td class="col-cost">${formatNumber(r.cost)}</td>
+                        </tr>`;
+        }).join('');
 
         html += `
                     <div class="strategy-card">
                         <div class="strategy-header">
-                            <span class="t-label">平均天数（${strat.days} 天内最省）</span><br>
-                            <span class="t-value">${strat.daysActual.toFixed(1)} 天</span>
+                            <span class="t-label">平均天数</span><br>
+                            <span class="t-value">${(strat.avgGift / 10).toFixed(1)} 天</span>
                             <span class="stat-group">
                                 <span>人均礼物 <strong>${strat.avgGift.toFixed(1)}</strong></span>
                                 <span>人均方斯 <strong>${formatNumber(Math.round(strat.avgCost))}</strong></span>
@@ -898,16 +939,20 @@ function renderStrategies(strategies) {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>地点</th>
+                                        <th>角色</th>
                                         <th>档位</th>
                                         <th>礼物名</th>
-                                        <th>数量</th>
-                                        <th>单价</th>
-                                        <th>小计</th>
+                                        <th>地点</th>
+                                        <th>礼物数</th>
+                                        <th>方斯</th>
                                     </tr>
                                 </thead>
-                                <tbody>${bodyRows}</tbody>
+                                <tbody>${tableRows}</tbody>
                             </table>
+                            ${strat.triggerChars.length > 0 ? `
+                            <div class="strategy-note">
+                                其它好感来源最适合给的角色：${strat.triggerChars.map(c => `<span class="trigger-tag">${c.name}</span>`).join('、')}
+                            </div>` : ''}
                         </div>
                     </div>`;
     });
@@ -916,17 +961,16 @@ function renderStrategies(strategies) {
     strategiesContainer.innerHTML = html;
 }
 
-function updateStrategyView(force) {
-    if (!curve || curve.points.length === 0) {
-        strategiesContainer.innerHTML = '<div class="empty-state">请至少选择一个角色</div>';
-        strategyCountEl.textContent = '0 种方案';
-        strategiesCacheKey = lastSelectedKey;
-        return;
-    }
-    if (force || strategiesCacheKey !== lastSelectedKey) {
-        renderStrategies(computeStrategies());
-        strategiesCacheKey = lastSelectedKey;
-    }
+function updateStrategyView() {
+    const selected = [];
+    model.forEach((r, i) => {
+        const cb = document.getElementById("r" + i);
+        if (cb && cb.checked) {
+            selected.push(r);
+        }
+    });
+    const strategies = computeStrategies(selected);
+    renderStrategies(strategies);
 }
 
 /* ============================================================
@@ -943,8 +987,7 @@ function switchView(viewName) {
     } else {
         chartView.classList.add('view-hidden');
         strategyView.classList.remove('view-hidden');
-        ensureCurve();
-        updateStrategyView(true);
+        updateStrategyView();
     }
     viewTabs.forEach(tab => {
         tab.classList.toggle('active', tab.dataset.view === viewName);

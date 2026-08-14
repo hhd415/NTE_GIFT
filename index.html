@@ -49,22 +49,25 @@
                     <p>此外还增加了地点整合与排序方便购买</p>
                 </div>
                 <div class="help-section">
-                    <h4>2. 计算逻辑是什么？</h4>
-                    <p>本网站允许每个角色<strong>混合赠送</strong> 100 / 200 / 400 档礼物。对每个角色，算法枚举所有合法组合（400档×a + 200档×b + 100档×c，总好感 ≥ 54100），保留互不支配的「件数 – 方斯」最优前沿；再把全部角色沿各自前沿做<strong>全局最优求解</strong>，得到<b>「平均天数 – 人均方斯」最优曲线</b>。曲线上的每个点都是一套全局最优方案，拖拽圆点即可切换查看。</p>
+                    <h4>2. 一个角色只送一种礼物的方案（非混合），其计算逻辑是什么？</h4>
+                    <p>设定阈值 <strong>T</strong> 为你愿意为省下一次送礼机会多花多少方斯。当 <strong>e200 ≤ T</strong> 时，升到 200 档更划算；当 <strong>e400 ≤ T</strong> 时，升到 400 档。此逻辑可避免只对比单个角色的三档礼物，导致从全角色来看损失方斯。</p>
                 </div>
                 <div class="help-section">
-                    <h4>3. e200 / e400 是什么？</h4>
-                    <p>以下两列作为参考数据展示：用 200 档礼物替代 2 件 100 档礼物需要多花的方斯，以及用 400 档替代 4 件 100 档时每省一件礼物平均多花的方斯。新算法不再依赖单一阈值，而是直接计算混合礼物的最优组合。</p>
+                    <h4>3. e200 / e400 怎么算？</h4>
                     <div class="help-formula">e200 = ⌈200档价格 − 2 × 100档价格⌉</div>
+                    <p>即用 1 个 200 档礼物替代 2 个 100 档礼物需要多花的方斯。</p>
                     <div class="help-formula">e400 = ⌈(400档价格 − 4 × 100档价格) ÷ 3⌉</div>
+                    <p>即用 1 个 400 档礼物替代 4 个 100 档礼物时，每减少一件礼物平均多花的方斯（共省 3 件礼物，除以 3）。</p>
                 </div>
                 <div class="help-section">
-                    <h4>4. 为什么要「每种礼物至少 9 件」？</h4>
-                    <p>如果某个角色的方案里出现 1~8 件的某档礼物，玩家还得专门跑一趟商店去凑这点数量，很不划算。因此该方案会被<strong>直接作废</strong>（按每个角色各自判定），算法只会给出每种用到的礼物都 <strong>≥ 9 件</strong>的方案。</p>
+                    <h4>4. 补礼物计算说明</h4>
+                    <p>角色 <strong>8 级及以下</strong>的部分经验享受 +5% 好感加成（可能有 1 个礼物的误差），<strong>9 级及以上</strong>按基础值计算，结果向上取整为实际需要购买的礼物个数。</p>
                 </div>
                 <div class="help-section">
-                    <h4>5. 补礼物计算说明</h4>
-                    <p>角色 <strong>8 级及以下</strong>的部分经验享受 +5% 好感加成（可能有 1 个礼物的误差），<strong>9 级及以上</strong>按基础值计算。结果按当前曲线方案中该角色的礼物比例分摊并向上取整为实际需要购买的礼物个数。</p>
+                    <h4>5. 混搭礼物算法（新模块「混搭礼物最优法」）</h4>
+                    <p>旧算法中每个角色只能使用一种档位的礼物。新模块允许<b>同一个角色混搭 100 / 200 / 400 档礼物</b>，例如「133 个 400 档 + 9 个 100 档」恰好凑满 54100 好感，比只送 136 个 400 档更省方斯。</p>
+                    <p>算法枚举每个角色的全部合法混搭，先求出每个角色自己的（礼物数，方斯）帕累托前沿，再合并出全角色的<b>「平均天数 — 人均方斯」帕累托最优曲线</b>：曲线上的方案不会被任何其它方案在礼物数和方斯上同时击败（想要更少天数，必然要多花方斯）。</p>
+                    <p><b>约束：</b>方案中任何一样礼物少于 <strong>N 件</strong> 的会被直接丢弃（例如需要补 1~9 个 100 档礼物的方案），以免玩家为了几件礼物专门跑一趟商店。N 可在「混搭礼物最优法」视图的「单样礼物最低」下拉框中自行设置（默认 10 件，设为 0 表示不限制）；算法对任意 N 的计算开销几乎不变。</p>
                 </div>
             </div>
         </div>
@@ -76,6 +79,7 @@
         <div class="view-tabs">
             <div class="view-tab active" data-view="chart">🎯 二维图展示法</div>
             <div class="view-tab" data-view="strategy">📊 表格展示法</div>
+            <div class="view-tab" data-view="mixed">🔀 混搭礼物最优法</div>
         </div>
 
         <!-- ===== 角色筛选卡（两个视图共享） ===== -->
@@ -122,10 +126,10 @@
                 </div>
             </div>
 
-            <!-- 当前方案组成 -->
+            <!-- 最佳角色卡 -->
             <div class="card" id="bestCharsCard">
-                <h3>🎯 当前方案组成</h3>
-                <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽曲线圆点以切换最优方案</div>
+                <h3>云朵、电影院最佳角色</h3>
+                <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽图表圆点以查看对应角色</div>
             </div>
 
             <!-- 表格 -->
@@ -135,7 +139,7 @@
                         <tr class="group">
                             <th colspan="1">名字</th>
                             <th colspan="5" class="raw-group-header">原始数据及计算</th>
-                            <th colspan="5">推荐（混合礼物）</th>
+                            <th colspan="3">推荐</th>
                             <th colspan="2">结果</th>
                         </tr>
                         <tr class="labels">
@@ -145,13 +149,11 @@
                             <th class="raw-col">400</th>
                             <th class="raw-col">用200礼物减少</th>
                             <th class="raw-col">用400礼物减少</th>
-                            <th class="col-tier">档位</th>
-                            <th class="col-giftname">礼物名</th>
-                            <th class="col-gift">数量</th>
-                            <th class="col-location">地点</th>
-                            <th class="col-cost">该礼物方斯</th>
-                            <th class="col-gift">总礼物</th>
-                            <th class="col-cost">总方斯</th>
+                            <th class="col-choice">推荐值</th>
+                            <th>地点</th>
+                            <th>礼物名</th>
+                            <th>总礼物</th>
+                            <th>总方斯</th>
                         </tr>
                     </thead>
                     <tbody id="tbody"></tbody>
@@ -207,11 +209,74 @@
 
         </div><!-- #strategyView -->
 
+        <!-- ===== 混搭礼物最优法视图（新算法：单角色可混搭多档礼物） ===== -->
+        <div id="mixedView" class="view-hidden">
+
+            <div class="card">
+                <div class="strategy-summary-bar">
+                    <span class="strategy-count" id="mixedPointCount">0 个最优方案</span>
+                    <span class="strategy-hint" id="mixedComputeTime"></span>
+                    <button class="btn-screenshot" id="btnSaveMixed">📷 保存当前方案截图</button>
+                </div>
+                <div class="controls-row">
+                    <div class="chart-wrapper">
+                        <div class="mixed-min-bar">
+                            <label class="mixed-min-label" for="mixedMinSelect">单样礼物最低
+                                <select id="mixedMinSelect">
+                                    <option value="0">0 件（不限）</option>
+                                    <option value="10" selected>10 件</option>
+                                    <option value="20">20 件</option>
+                                    <option value="30">30 件</option>
+                                    <option value="40">40 件</option>
+                                    <option value="50">50 件</option>
+                                    <option value="60">60 件</option>
+                                    <option value="70">70 件</option>
+                                    <option value="80">80 件</option>
+                                    <option value="90">90 件</option>
+                                    <option value="100">100 件</option>
+                                </select>
+                            </label>
+                            <span class="mixed-min-hint" id="mixedMinHint">允许同一角色混搭 100/200/400 档礼物；任何礼物不足 10 件的方案已被剔除</span>
+                        </div>
+                        <div class="chart-info" id="mixedChartInfo">计算中…</div>
+                        <div class="chart-svg-wrap">
+                            <svg id="mixedChartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+                            <div class="chart-tooltip" id="mixedChartTooltip"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="mixedDetailCard">
+                <h3>🎁 当前方案：各角色混搭明细 &amp; 购物清单</h3>
+                <div id="mixedDetail"><div class="empty-state">请至少选择一个角色</div></div>
+            </div>
+
+            <div class="card">
+                <h3>📋 全部最优方案（0.1 天粒度，点击行切换）</h3>
+                <div class="mixed-list-wrap">
+                    <table class="mixed-list-table">
+                        <thead>
+                            <tr>
+                                <th>平均天数</th>
+                                <th>人均礼物</th>
+                                <th>人均方斯</th>
+                                <th>总礼物</th>
+                                <th>总方斯</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mixedListBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- #mixedView -->
+
     </div>
 
     <script src="common.js"></script>
-    <script src="mixed.js"></script>
     <script src="script.js"></script>
+    <script src="mixed.js"></script>
 
 </body>
 </html>

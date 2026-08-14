@@ -536,7 +536,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
-    min-width: 1400px;
+    min-width: 1150px;
     background: white;
     line-height: 1.7;
 }
@@ -652,16 +652,6 @@ tbody tr:last-child td {
     letter-spacing: 0.2px;
 }
 
-.col-tier {
-    white-space: nowrap;
-}
-
-.col-price {
-    font-family: 'Inter', monospace;
-    letter-spacing: 0.2px;
-    color: #5a6a8a;
-}
-
 /* ===== 折叠隐藏 ===== */
 .raw-col.hidden-raw {
     display: none !important;
@@ -737,7 +727,7 @@ thead tr.group th.raw-group-header.hidden-raw {
     /* 表格更紧凑 */
     table {
         font-size: 13px;
-        min-width: 1000px;
+        min-width: 900px;
     }
 
     thead tr.labels th {
@@ -873,7 +863,7 @@ thead tr.group th.raw-group-header.hidden-raw {
 
     table {
         font-size: 12px;
-        min-width: 720px;
+        min-width: 600px;
     }
 
     thead tr.labels th {
@@ -1752,67 +1742,333 @@ thead tr.group th.raw-group-header.hidden-raw {
 }
 
 /* ============================================================
-   18. 混合礼物新增样式
+   混搭礼物最优法（新模块 mixed.js）
    ============================================================ */
-/* 档位徽标 */
-.tier-badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    line-height: 1.5;
+/* 单样礼物最低件数（放在曲线信息上方，突出显示） */
+.mixed-min-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 18px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #eaf1ff, #e2ebfb);
+    border: 2px solid #6f96d8;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 540px;
+    box-sizing: border-box;
 }
 
-.tier-100 { background: #e8f5e9; color: #2e7d32; }
-.tier-200 { background: #e3f0fa; color: #1565c0; }
-.tier-400 { background: #fdeeee; color: #c62828; }
+.mixed-min-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a3a6a;
+    white-space: nowrap;
+}
 
-/* 当前方案组成徽标 */
-.mix-badge {
+.mixed-min-label select {
+    padding: 6px 14px;
+    border: 2px solid #4a7acc;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: inherit;
+    background: #ffffff;
+    color: #1a3a6a;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mixed-min-label select:focus {
+    border-color: #2f5fb0;
+    box-shadow: 0 0 0 4px rgba(74, 122, 204, 0.18);
+}
+
+.mixed-min-hint {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2a3a5a;
+}
+
+.mixed-detail-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    background: #f0f4fd;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #3a4a6a;
+}
+
+    .mixed-detail-summary span strong {
+        color: #1a3a6a;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+.mixed-sub-title {
+    margin: 18px 0 6px;
+    font-size: 16px;
+    color: #1a2744;
+    font-weight: 500;
+}
+
+.mixed-shop-note {
+    font-size: 13px;
+    color: #2e7d32;
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    border-radius: 8px;
+    padding: 6px 14px;
+    margin-bottom: 10px;
     display: inline-block;
-    margin: 4px 8px 0 0;
-    padding: 2px 12px;
-    border-radius: 20px;
+}
+
+.mixed-table-wrap {
+    margin-bottom: 0;
+}
+
+.mixed-detail-table,
+.mixed-shop-table,
+.mixed-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 0;
+    line-height: 1.6;
+    background: white;
+}
+
+.mixed-detail-table { min-width: 760px; }
+.mixed-shop-table { min-width: 540px; }
+.mixed-list-table { min-width: 460px; }
+
+.mixed-detail-table thead th,
+.mixed-shop-table thead th,
+.mixed-list-table thead th {
+    background: #eef2f8;
+    color: #1a2a4a;
+    padding: 10px 10px;
     font-size: 13px;
     font-weight: 500;
-    line-height: 1.7;
+    text-align: center;
+    border-right: 1px solid #d6deec;
+    border-bottom: 2px solid #c8d2e4;
+    white-space: nowrap;
 }
 
-.mix-400 { background: #fdeeee; color: #c62828; }
-.mix-200 { background: #e3f0fa; color: #1565c0; }
-.mix-100 { background: #e8f5e9; color: #2e7d32; }
-
-/* 策略购物清单：赠予角色小字 */
-.gift-recipients {
-    font-size: 11px;
-    color: #8a9ab8;
-    font-weight: 400;
-    line-height: 1.5;
+.mixed-detail-table thead th:last-child,
+.mixed-shop-table thead th:last-child,
+.mixed-list-table thead th:last-child {
+    border-right: none;
 }
 
-.strategy-body .col-price {
-    color: #4a5e7a;
+.mixed-detail-table tbody td,
+.mixed-shop-table tbody td,
+.mixed-list-table tbody td {
+    border-bottom: 1px solid #eef2f8;
+    padding: 9px 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    transition: background 0.12s;
 }
 
-/* 移动端：策略卡片单列 */
-@media (max-width: 900px) {
-    .strategies-grid {
-        grid-template-columns: 1fr;
+.mixed-detail-table tbody tr:hover td,
+.mixed-shop-table tbody tr:hover td {
+    background: #f6faff;
+}
+
+.mixed-detail-table tbody tr:last-child td,
+.mixed-shop-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.mixed-detail-table tfoot td {
+    background: #f6f8fc;
+    font-weight: 600;
+    color: #1a2744;
+    border-bottom: none;
+    padding: 10px 10px;
+}
+
+.tier-name { color: #1f3a6a; }
+.tier-count { font-weight: 600; color: #1a3a6a; margin-left: 6px; }
+.tier-none { color: #b8c4d8; }
+
+.over-zero { color: #2e7d32; font-weight: 600; }
+.over-plus { color: #b26a00; }
+
+/* 方案列表 */
+.mixed-list-wrap {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e8ecf4;
+    border-radius: 12px;
+    background: white;
+}
+
+    .mixed-list-wrap::-webkit-scrollbar { width: 8px; }
+    .mixed-list-wrap::-webkit-scrollbar-track { background: #eef2f8; border-radius: 4px; }
+    .mixed-list-wrap::-webkit-scrollbar-thumb { background: #c8d2e4; border-radius: 4px; }
+    .mixed-list-wrap::-webkit-scrollbar-thumb:hover { background: #a8b6d0; }
+
+.mixed-list-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.mixed-list-table tbody tr {
+    cursor: pointer;
+}
+
+.mixed-list-table tbody tr.selected td {
+    background: #e8f0fd !important;
+}
+
+/* 图表手柄 */
+#mixedDragHandle {
+    cursor: grab;
+    filter: drop-shadow(0 2px 6px rgba(26, 58, 106, 0.4));
+    transition: r 0.15s;
+}
+
+    #mixedDragHandle:active {
+        cursor: grabbing;
     }
+
+    #mixedDragHandle:hover {
+        filter: drop-shadow(0 4px 12px rgba(26, 58, 106, 0.55));
+    }
+
+/* ---------- 混搭模块暗色模式 ---------- */
+@media (prefers-color-scheme: dark) {
+    .mixed-min-bar {
+        background: linear-gradient(135deg, #2b3350, #2a2d3e);
+        border-color: #5a8adc;
+    }
+
+    .mixed-min-label {
+        color: #c8cce0;
+    }
+
+    .mixed-min-label select {
+        background: #1f2333;
+        border-color: #5a8adc;
+        color: #d0d6e8;
+    }
+
+    .mixed-min-label select:focus {
+        border-color: #7a9fe8;
+        box-shadow: 0 0 0 4px rgba(90, 138, 220, 0.2);
+    }
+
+    .mixed-min-hint {
+        color: #a0a8c0;
+    }
+
+    .mixed-detail-summary {
+        background: #2a2d3e;
+        color: #a0a8c0;
+    }
+
+        .mixed-detail-summary span strong {
+            color: #a0b8e0;
+        }
+
+    .mixed-sub-title {
+        color: #c8cce0;
+    }
+
+    .mixed-shop-note {
+        background: #1b3a1e;
+        border-color: #2d5a30;
+        color: #81c784;
+    }
+
+    .mixed-detail-table,
+    .mixed-shop-table,
+    .mixed-list-table {
+        background: #252836;
+    }
+
+    .mixed-detail-table thead th,
+    .mixed-shop-table thead th,
+    .mixed-list-table thead th {
+        background: #2a2d3e;
+        color: #c0c4d8;
+        border-right-color: #3a3d50;
+        border-bottom-color: #4a4e65;
+    }
+
+    .mixed-detail-table tbody td,
+    .mixed-shop-table tbody td,
+    .mixed-list-table tbody td {
+        background: #252836;
+        border-bottom-color: #333648;
+        color: #c8ccd8;
+    }
+
+    .mixed-detail-table tbody tr:hover td,
+    .mixed-shop-table tbody tr:hover td {
+        background: #2a2e40;
+    }
+
+    .mixed-detail-table tfoot td {
+        background: #2a2d3e;
+        color: #d0d6e8;
+    }
+
+    .mixed-list-wrap {
+        background: #252836;
+        border-color: #3a3d50;
+    }
+
+        .mixed-list-wrap::-webkit-scrollbar-track { background: #2a2d3e; }
+        .mixed-list-wrap::-webkit-scrollbar-thumb { background: #4a4e65; }
+        .mixed-list-wrap::-webkit-scrollbar-thumb:hover { background: #5a5e78; }
+
+    .mixed-list-table tbody tr.selected td {
+        background: #2f3a55 !important;
+    }
+
+    .tier-name { color: #a0b0d0; }
+    .tier-count { color: #a0b8e0; }
+    .tier-none { color: #5a5e78; }
+
+    .over-zero { color: #81c784; }
+    .over-plus { color: #ffab40; }
 }
 
-/* 暗色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .tier-100 { background: #1b3a1e; color: #81c784; }
-    .tier-200 { background: #1a2f44; color: #7aa2f0; }
-    .tier-400 { background: #3a1f1f; color: #ef9a9a; }
+/* ---------- 混搭模块移动端 ---------- */
+@media (max-width: 900px) {
+    .mixed-detail-summary {
+        gap: 8px 14px;
+        padding: 10px 14px;
+        font-size: 13px;
+    }
 
-    .mix-400 { background: #3a1f1f; color: #ef9a9a; }
-    .mix-200 { background: #1a2f44; color: #7aa2f0; }
-    .mix-100 { background: #1b3a1e; color: #81c784; }
+        .mixed-detail-summary span strong {
+            font-size: 14px;
+        }
 
-    .gift-recipients { color: #7a7e98; }
-    .strategy-body .col-price { color: #9098b0; }
+    .mixed-detail-table { min-width: 620px; }
+    .mixed-shop-table { min-width: 440px; }
+    .mixed-list-table { min-width: 340px; }
+
+    .mixed-detail-table tbody td,
+    .mixed-shop-table tbody td,
+    .mixed-list-table tbody td {
+        font-size: 12px;
+        padding: 7px 4px;
+    }
 }
