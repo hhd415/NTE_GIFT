@@ -7,6 +7,7 @@
 const fs = require('fs');
 const vm = require('vm');
 
+const dataSrc = fs.readFileSync(require('path').join(__dirname, 'data.js'), 'utf8');
 const commonSrc = fs.readFileSync(require('path').join(__dirname, 'common.js'), 'utf8');
 const mixedSrc = fs.readFileSync(require('path').join(__dirname, 'mixed.js'), 'utf8');
 
@@ -19,6 +20,7 @@ const sandbox = {
 };
 // 注意：不定义 document / window，mixed.js 的 UI 部分会被跳过
 vm.createContext(sandbox);
+vm.runInContext(dataSrc, sandbox, { filename: 'data.js' });
 vm.runInContext(commonSrc, sandbox, { filename: 'common.js' });
 vm.runInContext(mixedSrc, sandbox, { filename: 'mixed.js' });
 // 顶层 const/let 不挂在 sandbox 上，需要再跑一段脚本把它们导出
@@ -102,17 +104,17 @@ console.log('  通过');
 console.log('\n[2] 哈索尔特特征点');
 const h = model[0];
 const fh = mixedCharFrontier(h);
-// n=142 的最优混搭：129×400 + 13×200 = 54,200 好感，比 133×400+9×100 更省
-const p142 = fh.find(p => p.n === 142);
-assert(p142 && p142.a === 0 && p142.b === 13 && p142.c === 129, '129×400+13×200 特征点缺失');
-if (p142) assert(p142.cost === 129 * 20000 + 13 * 5000, '特征点成本错: ' + p142.cost);
-// 直观但次优的混搭（133×400+9×100, cost 2,664,050）必须被帕累托过滤淘汰
-assert(!fh.some(p => p.a === 9 && p.b === 0 && p.c === 133), '被支配的 133×400+9×100 点不应留在前沿上');
+// n=146 的最优混搭：125×400 + 21×200 = 54,200 好感（默认 minCount=20 下第一个混合点）
+const p146 = fh.find(p => p.n === 146);
+assert(p146 && p146.a === 0 && p146.b === 21 && p146.c === 125, '125×400+21×200 特征点缺失');
+if (p146) assert(p146.cost === 125 * 20000 + 21 * 5000, '特征点成本错: ' + p146.cost);
+// 同 n=146 的次优混搭（126×400+20×200, cost 2,620,000）必须被帕累托过滤淘汰
+assert(!fh.some(p => p.a === 0 && p.b === 20 && p.c === 126), '被支配的 126×400+20×200 点不应留在前沿上');
 const p136 = fh.find(p => p.n === 136);
 assert(p136 && p136.a === 0 && p136.b === 0 && p136.c === 136, '全 400 档点缺失');
 const p541 = fh.find(p => p.n === 541);
 assert(p541 && p541.a === 541 && p541.b === 0 && p541.c === 0, '全 100 档点缺失');
-console.log('  n=136 -> cost', fh[0].cost, '| n=142 -> cost', p142 && p142.cost, '| n=541 -> cost', p541 && p541.cost);
+console.log('  n=136 -> cost', fh[0].cost, '| n=146 -> cost', p146 && p146.cost, '| n=541 -> cost', p541 && p541.cost);
 
 /* ---------- 3. 哈索尔全枚举暴力校验 ---------- */
 console.log('\n[3] 哈索尔全枚举暴力校验（约 2000 万组合）…');

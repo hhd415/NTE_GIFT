@@ -978,16 +978,20 @@ function updateStrategyView() {
    ============================================================ */
 const chartView = document.getElementById("chartView");
 const strategyView = document.getElementById("strategyView");
+const giftView = document.getElementById("giftView");
 const viewTabs = document.querySelectorAll(".view-tab");
 
 function switchView(viewName) {
-    if (viewName === 'chart') {
-        chartView.classList.remove('view-hidden');
-        strategyView.classList.add('view-hidden');
-    } else {
-        chartView.classList.add('view-hidden');
-        strategyView.classList.remove('view-hidden');
+    chartView.classList.toggle('view-hidden', viewName !== 'chart');
+    strategyView.classList.toggle('view-hidden', viewName !== 'strategy');
+    giftView.classList.toggle('view-hidden', viewName !== 'gift');
+    if (viewName === 'strategy') {
         updateStrategyView();
+    }
+    if (viewName === 'gift') {
+        // 切到补礼物计算视图时刷新计算结果
+        if (gcChar.options.length === 0) initGiftCalc();
+        else updateGiftCalc();
     }
     viewTabs.forEach(tab => {
         tab.classList.toggle('active', tab.dataset.view === viewName);

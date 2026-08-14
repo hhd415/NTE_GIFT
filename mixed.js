@@ -17,7 +17,7 @@
           （各角色混搭明细 + 按地点排序的购物清单）。
 
    ▸ 约束（用户要求）：任何一样礼物不足 minCount 件的方案一律丢弃。
-     minCount 由玩家在界面上选择（默认 10，0 表示不限制）；
+     minCount 由玩家在界面上选择（默认 20，0 表示不限制）；
      实现方式：枚举时直接把 1~(minCount-1) 件的“补法”抬到
      minCount 件或归零，因此算法输出的每个方案都天然满足
      “每样礼物 ≥ minCount 件”，玩家不需要为了几件礼物专程跑一趟商店。
@@ -28,7 +28,7 @@
 
 const MIXED_CONFIG = Object.freeze({
     favorTarget: 54100, // 每个角色练满所需好感（与原算法一致：⌈54100/档位⌉）
-    minCount: 10        // 任何一样礼物不足 10 件的方案作废（界面可调，此为回退默认值）
+    minCount: 20        // 任何一样礼物不足 20 件的方案作废（界面可调，此为回退默认值）
 });
 
 /* ============================================================
@@ -192,7 +192,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
         const mixedPointCount = document.getElementById('mixedPointCount');
         const mixedComputeTime = document.getElementById('mixedComputeTime');
         const mixedDetail = document.getElementById('mixedDetail');
-        const mixedListBody = document.getElementById('mixedListBody');
         const btnSaveMixed = document.getElementById('btnSaveMixed');
         const mixedMinSelect = document.getElementById('mixedMinSelect');
         const mixedMinHint = document.getElementById('mixedMinHint');
@@ -439,7 +438,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
                     return '<tr>' +
                         '<td class="col-giftname">' + it.name + '</td>' +
                         '<td class="col-location">' + it.loc + '</td>' +
-                        '<td>' + formatNumber(it.price) + '</td>' +
                         '<td class="col-gift">' + it.count + '</td>' +
                         '<td class="col-cost">' + formatNumber(it.price * it.count) + '</td>' +
                         '</tr>';
@@ -448,48 +446,23 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
             html += '<h4 class="mixed-sub-title">🛒 购物清单（按地点排序）</h4>';
             html += '<div class="mixed-shop-note">✅ ' + mixedMinNote() + '</div>';
             html += '<div class="table-wrap mixed-table-wrap"><table class="mixed-shop-table">' +
-                '<thead><tr><th>礼物名</th><th>地点</th><th>单价</th><th>数量</th><th>合计方斯</th></tr></thead>' +
+                '<thead><tr><th>礼物名</th><th>地点</th><th>数量</th><th>合计方斯</th></tr></thead>' +
                 '<tbody>' + itemRows + '</tbody></table></div>';
 
             mixedDetail.innerHTML = html;
         }
 
-        /* ---------- 全部最优方案列表（0.1 天粒度去重） ---------- */
-        function mixedRenderList() {
-            if (!mixedListBody) return;
+        /* ---------- 顶部统计（最优方案数量 / 计算耗时） ---------- */
+        function mixedRenderStats() {
             const pts = state.frontier || [];
             const m = state.chars ? state.chars.length : 0;
-
-            if (m === 0 || pts.length === 0) {
-                mixedListBody.innerHTML = '<tr><td colspan="5" class="empty-state">请至少选择一个角色</td></tr>';
-                mixedPointCount.textContent = '0 个最优方案';
-                if (mixedComputeTime) mixedComputeTime.textContent = '';
-                return;
+            const empty = m === 0 || pts.length === 0;
+            if (mixedPointCount) {
+                mixedPointCount.textContent = empty ? '0 个最优方案' : pts.length + ' 个最优方案';
             }
-
-            // 每个 0.1 天粒度只保留最省方斯的一个方案
-            const buckets = new Map();
-            pts.forEach(function (p, idx) {
-                const key = Math.round(daysOf(p) * 10);
-                const best = buckets.get(key);
-                if (!best || p.cost < best.cost) buckets.set(key, { idx: idx, p: p });
-            });
-            const rows = Array.from(buckets.values()).sort(function (a, b) { return a.idx - b.idx; });
-
-            mixedListBody.innerHTML = rows.map(function (row) {
-                const p = row.p;
-                const sel = row.idx === state.selIdx ? ' class="selected"' : '';
-                return '<tr data-idx="' + row.idx + '"' + sel + '>' +
-                    '<td>' + daysOf(p).toFixed(1) + ' 天</td>' +
-                    '<td>' + (p.n / m).toFixed(1) + '</td>' +
-                    '<td>' + formatNumber(Math.round(p.cost / m)) + '</td>' +
-                    '<td>' + formatNumber(p.n) + '</td>' +
-                    '<td>' + formatNumber(Math.round(p.cost)) + '</td>' +
-                    '</tr>';
-            }).join('');
-
-            mixedPointCount.textContent = pts.length + ' 个最优方案';
-            if (mixedComputeTime) mixedComputeTime.textContent = '计算耗时 ' + Math.round(state.computeMs) + ' ms';
+            if (mixedComputeTime) {
+                mixedComputeTime.textContent = empty ? '' : '计算耗时 ' + Math.round(state.computeMs) + ' ms';
+            }
         }
 
         /* ---------- 选中某个前沿点 ---------- */
@@ -499,11 +472,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
             state.selIdx = idx;
             mixedDrawChart();
             mixedRenderDetail();
-            if (mixedListBody) {
-                mixedListBody.querySelectorAll('tr').forEach(function (tr) {
-                    tr.classList.toggle('selected', parseInt(tr.dataset.idx, 10) === idx);
-                });
-            }
         }
 
         /* ---------- 单样礼物最低件数（minCount）文案 ---------- */
@@ -522,9 +490,9 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
 
         function mixedRenderAll() {
             updateMixedMinHint();
+            mixedRenderStats();
             mixedDrawChart();
             mixedRenderDetail();
-            mixedRenderList();
         }
 
         /* ---------- 拖拽 + 悬停提示 ---------- */
@@ -652,15 +620,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
             mixedChartSvg.addEventListener('mouseleave', onLeave);
         }
 
-        /* ---------- 列表点击切换 ---------- */
-        if (mixedListBody) {
-            mixedListBody.addEventListener('click', function (e) {
-                if (!e.target || !e.target.closest) return;
-                const tr = e.target.closest('tr[data-idx]');
-                if (tr) mixedSelect(parseInt(tr.dataset.idx, 10));
-            });
-        }
-
         /* ---------- 单样礼物最低件数切换（签名变化触发重算） ---------- */
         if (mixedMinSelect) {
             mixedMinSelect.addEventListener('change', function () {
@@ -712,6 +671,7 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
                 mixedViewOpen = true;
                 if (typeof chartView !== 'undefined') chartView.classList.add('view-hidden');
                 if (typeof strategyView !== 'undefined') strategyView.classList.add('view-hidden');
+                if (typeof giftView !== 'undefined') giftView.classList.add('view-hidden');
                 mixedView.classList.remove('view-hidden');
                 if (ensureComputed()) {
                     mixedRenderAll();
@@ -719,7 +679,7 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined' && typeof m
                     // 已缓存：重绘（可能刚切换过暗色模式等）
                     mixedDrawChart();
                     mixedRenderDetail();
-                    mixedRenderList();
+                    mixedRenderStats();
                 }
             } else {
                 mixedViewOpen = false;

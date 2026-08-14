@@ -65,9 +65,7 @@
                 </div>
                 <div class="help-section">
                     <h4>5. 混搭礼物算法（新模块「混搭礼物最优法」）</h4>
-                    <p>旧算法中每个角色只能使用一种档位的礼物。新模块允许<b>同一个角色混搭 100 / 200 / 400 档礼物</b>，例如「133 个 400 档 + 9 个 100 档」恰好凑满 54100 好感，比只送 136 个 400 档更省方斯。</p>
                     <p>算法枚举每个角色的全部合法混搭，先求出每个角色自己的（礼物数，方斯）帕累托前沿，再合并出全角色的<b>「平均天数 — 人均方斯」帕累托最优曲线</b>：曲线上的方案不会被任何其它方案在礼物数和方斯上同时击败（想要更少天数，必然要多花方斯）。</p>
-                    <p><b>约束：</b>方案中任何一样礼物少于 <strong>N 件</strong> 的会被直接丢弃（例如需要补 1~9 个 100 档礼物的方案），以免玩家为了几件礼物专门跑一趟商店。N 可在「混搭礼物最优法」视图的「单样礼物最低」下拉框中自行设置（默认 10 件，设为 0 表示不限制）；算法对任意 N 的计算开销几乎不变。</p>
                 </div>
             </div>
         </div>
@@ -80,6 +78,7 @@
             <div class="view-tab active" data-view="chart">🎯 二维图展示法</div>
             <div class="view-tab" data-view="strategy">📊 表格展示法</div>
             <div class="view-tab" data-view="mixed">🔀 混搭礼物最优法</div>
+            <div class="view-tab" data-view="gift">📦 补礼物计算</div>
         </div>
 
         <!-- ===== 角色筛选卡（两个视图共享） ===== -->
@@ -160,6 +159,70 @@
                 </table>
             </div>
 
+        </div><!-- #chartView -->
+
+        <!-- ===== 方案对比视图 ===== -->
+        <div id="strategyView" class="view-hidden">
+
+            <div class="card">
+                <div class="strategy-summary-bar">
+                    <span class="strategy-count" id="strategyCount">0 种方案</span>
+                    <span class="strategy-hint">天数越少，越偏向高价值礼物（省次数但费方斯）</span>
+                    <button class="btn-screenshot" id="btnSaveAll" onclick="saveAllScreenshots()">📷 一键保存全部截图</button>
+                </div>
+                <div id="strategiesContainer"></div>
+            </div>
+
+        </div><!-- #strategyView -->
+
+        <!-- ===== 混搭礼物最优法视图（新算法：单角色可混搭多档礼物） ===== -->
+        <div id="mixedView" class="view-hidden">
+
+            <div class="card">
+                <div class="strategy-summary-bar">
+                    <span class="strategy-count" id="mixedPointCount">0 个最优方案</span>
+                    <span class="strategy-hint" id="mixedComputeTime"></span>
+                    <button class="btn-screenshot" id="btnSaveMixed">📷 保存当前方案截图</button>
+                </div>
+                <div class="controls-row">
+                    <div class="chart-wrapper">
+                        <div class="mixed-min-bar">
+                            <label class="mixed-min-label" for="mixedMinSelect">单样礼物最低
+                                <select id="mixedMinSelect">
+                                    <option value="0">0 件（不限）</option>
+                                    <option value="10">10 件</option>
+                                    <option value="20" selected>20 件</option>
+                                    <option value="30">30 件</option>
+                                    <option value="40">40 件</option>
+                                    <option value="50">50 件</option>
+                                    <option value="60">60 件</option>
+                                    <option value="70">70 件</option>
+                                    <option value="80">80 件</option>
+                                    <option value="90">90 件</option>
+                                    <option value="100">100 件</option>
+                                </select>
+                            </label>
+                            <span class="mixed-min-hint" id="mixedMinHint">允许同一角色混搭 100/200/400 档礼物；任何礼物不足 20 件的方案已被剔除</span>
+                        </div>
+                        <div class="chart-info" id="mixedChartInfo">计算中…</div>
+                        <div class="chart-svg-wrap">
+                            <svg id="mixedChartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+                            <div class="chart-tooltip" id="mixedChartTooltip"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="mixedDetailCard">
+                <h3>🎁 当前方案：各角色混搭明细 &amp; 购物清单</h3>
+                <div id="mixedDetail"><div class="empty-state">请至少选择一个角色</div></div>
+            </div>
+
+        </div><!-- #mixedView -->
+
+        <!-- ===== 补礼物计算视图（从二维图视图拆出的独立功能） ===== -->
+        <div id="giftView" class="view-hidden">
+
             <!-- 补礼物计算 -->
             <div class="card gift-calc-card">
                 <h3>📦 补礼物计算</h3>
@@ -193,87 +256,11 @@
                 </div>
             </div>
 
-        </div><!-- #chartView -->
-
-        <!-- ===== 方案对比视图 ===== -->
-        <div id="strategyView" class="view-hidden">
-
-            <div class="card">
-                <div class="strategy-summary-bar">
-                    <span class="strategy-count" id="strategyCount">0 种方案</span>
-                    <span class="strategy-hint">天数越少，越偏向高价值礼物（省次数但费方斯）</span>
-                    <button class="btn-screenshot" id="btnSaveAll" onclick="saveAllScreenshots()">📷 一键保存全部截图</button>
-                </div>
-                <div id="strategiesContainer"></div>
-            </div>
-
-        </div><!-- #strategyView -->
-
-        <!-- ===== 混搭礼物最优法视图（新算法：单角色可混搭多档礼物） ===== -->
-        <div id="mixedView" class="view-hidden">
-
-            <div class="card">
-                <div class="strategy-summary-bar">
-                    <span class="strategy-count" id="mixedPointCount">0 个最优方案</span>
-                    <span class="strategy-hint" id="mixedComputeTime"></span>
-                    <button class="btn-screenshot" id="btnSaveMixed">📷 保存当前方案截图</button>
-                </div>
-                <div class="controls-row">
-                    <div class="chart-wrapper">
-                        <div class="mixed-min-bar">
-                            <label class="mixed-min-label" for="mixedMinSelect">单样礼物最低
-                                <select id="mixedMinSelect">
-                                    <option value="0">0 件（不限）</option>
-                                    <option value="10" selected>10 件</option>
-                                    <option value="20">20 件</option>
-                                    <option value="30">30 件</option>
-                                    <option value="40">40 件</option>
-                                    <option value="50">50 件</option>
-                                    <option value="60">60 件</option>
-                                    <option value="70">70 件</option>
-                                    <option value="80">80 件</option>
-                                    <option value="90">90 件</option>
-                                    <option value="100">100 件</option>
-                                </select>
-                            </label>
-                            <span class="mixed-min-hint" id="mixedMinHint">允许同一角色混搭 100/200/400 档礼物；任何礼物不足 10 件的方案已被剔除</span>
-                        </div>
-                        <div class="chart-info" id="mixedChartInfo">计算中…</div>
-                        <div class="chart-svg-wrap">
-                            <svg id="mixedChartSvg" class="chart-svg" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet"></svg>
-                            <div class="chart-tooltip" id="mixedChartTooltip"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" id="mixedDetailCard">
-                <h3>🎁 当前方案：各角色混搭明细 &amp; 购物清单</h3>
-                <div id="mixedDetail"><div class="empty-state">请至少选择一个角色</div></div>
-            </div>
-
-            <div class="card">
-                <h3>📋 全部最优方案（0.1 天粒度，点击行切换）</h3>
-                <div class="mixed-list-wrap">
-                    <table class="mixed-list-table">
-                        <thead>
-                            <tr>
-                                <th>平均天数</th>
-                                <th>人均礼物</th>
-                                <th>人均方斯</th>
-                                <th>总礼物</th>
-                                <th>总方斯</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mixedListBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div><!-- #mixedView -->
+        </div><!-- #giftView -->
 
     </div>
 
+    <script src="data.js"></script>
     <script src="common.js"></script>
     <script src="script.js"></script>
     <script src="mixed.js"></script>

@@ -8,6 +8,7 @@ const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
 
+const dataSrc = fs.readFileSync(path.join(__dirname, 'data.js'), 'utf8');
 const commonSrc = fs.readFileSync(path.join(__dirname, 'common.js'), 'utf8');
 const mixedSrc = fs.readFileSync(path.join(__dirname, 'mixed.js'), 'utf8');
 
@@ -19,6 +20,7 @@ function bench(minCount) {
         performance: require('perf_hooks').performance
     };
     vm.createContext(sandbox);
+    vm.runInContext(dataSrc, sandbox, { filename: 'data.js' });
     vm.runInContext(commonSrc, sandbox, { filename: 'common.js' });
     vm.runInContext(mixedSrc, sandbox, { filename: 'mixed.js' });
     vm.runInContext(
