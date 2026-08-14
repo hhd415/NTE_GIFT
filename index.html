@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>异环礼物计算</title>
+    <title>异环最优礼物方案计算器</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -15,8 +15,10 @@
 
     <!-- 页面标题 -->
     <div class="page-header">
-        <h1>🎁 异环礼物计算器</h1>
-        <p class="page-subtitle">最优购买策略 · 排序购买地点</p>
+        <div class="title-row">
+            <h1>🎁 异环最优礼物方案计算器</h1>
+            <button class="help-btn" id="helpBtn" type="button" title="查看计算说明" aria-label="查看计算说明">i</button>
+        </div>
     </div>
 
     <!-- 反馈弹窗 -->
@@ -32,6 +34,39 @@
             <p>
                 <a class="email-link" href="mailto:3286687509@qq.com">3286687509@qq.com</a>
             </p>
+        </div>
+    </div>
+
+    <!-- 计算说明弹窗 -->
+    <div class="modal-overlay" id="helpOverlay">
+        <div class="modal-card help-card">
+            <button class="modal-close" id="helpClose">&times;</button>
+            <h3>📐 计算说明</h3>
+            <div class="help-body">
+                <div class="help-section">
+                    <h4>1. 为什么要做此网站？</h4>
+                    <p>可能出现给A角色2个100好感度的礼物 + 给B角色1个400好感度的礼物，比共送3个200好感度的礼物更便宜的情况。若只凭直觉选礼物，很可能在不知不觉中多花方斯。本网站旨在找到全角色的<b>最优礼物方案</b>，避免这类损失。</p>
+                    <p>此外还增加了地点整合与排序方便购买</p>
+                </div>
+                <div class="help-section">
+                    <h4>2. 计算逻辑是什么？</h4>
+                    <p>本网站允许每个角色<strong>混合赠送</strong> 100 / 200 / 400 档礼物。对每个角色，算法枚举所有合法组合（400档×a + 200档×b + 100档×c，总好感 ≥ 54100），保留互不支配的「件数 – 方斯」最优前沿；再把全部角色沿各自前沿做<strong>全局最优求解</strong>，得到<b>「平均天数 – 人均方斯」最优曲线</b>。曲线上的每个点都是一套全局最优方案，拖拽圆点即可切换查看。</p>
+                </div>
+                <div class="help-section">
+                    <h4>3. e200 / e400 是什么？</h4>
+                    <p>以下两列作为参考数据展示：用 200 档礼物替代 2 件 100 档礼物需要多花的方斯，以及用 400 档替代 4 件 100 档时每省一件礼物平均多花的方斯。新算法不再依赖单一阈值，而是直接计算混合礼物的最优组合。</p>
+                    <div class="help-formula">e200 = ⌈200档价格 − 2 × 100档价格⌉</div>
+                    <div class="help-formula">e400 = ⌈(400档价格 − 4 × 100档价格) ÷ 3⌉</div>
+                </div>
+                <div class="help-section">
+                    <h4>4. 为什么要「每种礼物至少 9 件」？</h4>
+                    <p>如果某个角色的方案里出现 1~8 件的某档礼物，玩家还得专门跑一趟商店去凑这点数量，很不划算。因此该方案会被<strong>直接作废</strong>（按每个角色各自判定），算法只会给出每种用到的礼物都 <strong>≥ 9 件</strong>的方案。</p>
+                </div>
+                <div class="help-section">
+                    <h4>5. 补礼物计算说明</h4>
+                    <p>角色 <strong>8 级及以下</strong>的部分经验享受 +5% 好感加成（可能有 1 个礼物的误差），<strong>9 级及以上</strong>按基础值计算。结果按当前曲线方案中该角色的礼物比例分摊并向上取整为实际需要购买的礼物个数。</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -87,10 +122,10 @@
                 </div>
             </div>
 
-            <!-- 最佳角色卡 -->
+            <!-- 当前方案组成 -->
             <div class="card" id="bestCharsCard">
-                <h3>云朵、电影院最佳角色</h3>
-                <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽图表圆点以查看对应角色</div>
+                <h3>🎯 当前方案组成</h3>
+                <div id="bestCharsContent" style="font-size:15px;color:#3a4a6a;line-height:1.8;">拖拽曲线圆点以切换最优方案</div>
             </div>
 
             <!-- 表格 -->
@@ -100,7 +135,7 @@
                         <tr class="group">
                             <th colspan="1">名字</th>
                             <th colspan="5" class="raw-group-header">原始数据及计算</th>
-                            <th colspan="3">推荐</th>
+                            <th colspan="5">推荐（混合礼物）</th>
                             <th colspan="2">结果</th>
                         </tr>
                         <tr class="labels">
@@ -110,11 +145,13 @@
                             <th class="raw-col">400</th>
                             <th class="raw-col">用200礼物减少</th>
                             <th class="raw-col">用400礼物减少</th>
-                            <th class="col-choice">推荐值</th>
-                            <th>地点</th>
-                            <th>礼物名</th>
-                            <th>总礼物</th>
-                            <th>总方斯</th>
+                            <th class="col-tier">档位</th>
+                            <th class="col-giftname">礼物名</th>
+                            <th class="col-gift">数量</th>
+                            <th class="col-location">地点</th>
+                            <th class="col-cost">该礼物方斯</th>
+                            <th class="col-gift">总礼物</th>
+                            <th class="col-cost">总方斯</th>
                         </tr>
                     </thead>
                     <tbody id="tbody"></tbody>
@@ -173,16 +210,8 @@
     </div>
 
     <script src="common.js"></script>
+    <script src="mixed.js"></script>
     <script src="script.js"></script>
-
-    <div class="container" style="margin-top:24px;">
-        <div class="card" style="font-size:14px;color:#5a6a8a;line-height:2;">
-            <h3>📐计算规则说明</h3>
-            <p>阈值 <strong>T</strong> 就是你愿意为省下一次送礼机会多花多少方斯，此逻辑可避免只对比一个角色的三挡礼物可能导致的从全角色来看损失方斯。当角色的 e200 ≤ T 时，升到 200 档更划算；当 e400 ≤ T 时，升到 400 档。</p>
-            <p><strong>e200</strong> = ⌈200档价格 − 2 × 100档价格⌉，即用 1 个 200 档替代 2 个 100 档需要多花的方斯。</p>
-            <p><strong>e400</strong> = ⌈(400档价格 − 4 × 100档价格) ÷ 3⌉，即用 1 个 400 档替代 4 个 100 档时，每减少一件礼物平均多花的方斯（共省 3 件，除以 3）。</p>
-        </div>
-    </div>
 
 </body>
 </html>

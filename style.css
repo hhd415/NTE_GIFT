@@ -36,6 +36,46 @@ body {
     font-weight: 400;
 }
 
+/* ===== 标题旁的 i 说明按钮 ===== */
+.title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.help-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #1a3a6a;
+    background: transparent;
+    color: #1a3a6a;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    user-select: none;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.help-btn:hover {
+    background: #1a3a6a;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.help-btn:active {
+    transform: scale(0.95);
+}
+
 /* ===== 公告栏 ===== */
 .announcement-bar {
     background: linear-gradient(135deg, #ff6b00, #ff8c00);
@@ -144,6 +184,58 @@ body {
 
 .modal-card .email-link:hover {
     text-decoration: underline;
+}
+
+/* ===== 计算说明弹窗 ===== */
+.modal-card.help-card {
+    max-width: 560px;
+    text-align: left;
+    padding: 30px 32px 24px;
+}
+
+.help-card h3 {
+    text-align: center;
+}
+
+.help-body {
+    max-height: 62vh;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-top: 4px;
+}
+
+.help-section {
+    margin-bottom: 18px;
+}
+
+.help-section h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a3a6a;
+}
+
+.help-section p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #3a4a6a;
+    line-height: 1.8;
+}
+
+.help-section strong {
+    color: #1a2744;
+}
+
+.help-formula {
+    background: #f0f4fd;
+    border-radius: 8px;
+    padding: 9px 14px;
+    margin: 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a3a6a;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.2px;
 }
 
 .container {
@@ -444,7 +536,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
-    min-width: 1150px;
+    min-width: 1400px;
     background: white;
     line-height: 1.7;
 }
@@ -560,6 +652,16 @@ tbody tr:last-child td {
     letter-spacing: 0.2px;
 }
 
+.col-tier {
+    white-space: nowrap;
+}
+
+.col-price {
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.2px;
+    color: #5a6a8a;
+}
+
 /* ===== 折叠隐藏 ===== */
 .raw-col.hidden-raw {
     display: none !important;
@@ -635,7 +737,7 @@ thead tr.group th.raw-group-header.hidden-raw {
     /* 表格更紧凑 */
     table {
         font-size: 13px;
-        min-width: 900px;
+        min-width: 1000px;
     }
 
     thead tr.labels th {
@@ -771,7 +873,7 @@ thead tr.group th.raw-group-header.hidden-raw {
 
     table {
         font-size: 12px;
-        min-width: 600px;
+        min-width: 720px;
     }
 
     thead tr.labels th {
@@ -1033,6 +1135,34 @@ thead tr.group th.raw-group-header.hidden-raw {
 
     .modal-card .email-link {
         color: #7aa2f0;
+    }
+
+    /* 计算说明弹窗（暗色） */
+    .help-btn {
+        border-color: #7aa2f0;
+        color: #7aa2f0;
+    }
+
+        .help-btn:hover {
+            background: #7aa2f0;
+            color: #252836;
+        }
+
+    .help-section h4 {
+        color: #a0b8e0;
+    }
+
+    .help-section p {
+        color: #a0a8c0;
+    }
+
+    .help-section strong {
+        color: #d0d6e8;
+    }
+
+    .help-formula {
+        background: #2a2d3e;
+        color: #a0b8e0;
     }
 
     /* 滚动条 */
@@ -1619,4 +1749,70 @@ thead tr.group th.raw-group-header.hidden-raw {
     .strategy-body::-webkit-scrollbar-thumb:hover {
         background: #5a5e78;
     }
+}
+
+/* ============================================================
+   18. 混合礼物新增样式
+   ============================================================ */
+/* 档位徽标 */
+.tier-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+.tier-100 { background: #e8f5e9; color: #2e7d32; }
+.tier-200 { background: #e3f0fa; color: #1565c0; }
+.tier-400 { background: #fdeeee; color: #c62828; }
+
+/* 当前方案组成徽标 */
+.mix-badge {
+    display: inline-block;
+    margin: 4px 8px 0 0;
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.7;
+}
+
+.mix-400 { background: #fdeeee; color: #c62828; }
+.mix-200 { background: #e3f0fa; color: #1565c0; }
+.mix-100 { background: #e8f5e9; color: #2e7d32; }
+
+/* 策略购物清单：赠予角色小字 */
+.gift-recipients {
+    font-size: 11px;
+    color: #8a9ab8;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.strategy-body .col-price {
+    color: #4a5e7a;
+}
+
+/* 移动端：策略卡片单列 */
+@media (max-width: 900px) {
+    .strategies-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+    .tier-100 { background: #1b3a1e; color: #81c784; }
+    .tier-200 { background: #1a2f44; color: #7aa2f0; }
+    .tier-400 { background: #3a1f1f; color: #ef9a9a; }
+
+    .mix-400 { background: #3a1f1f; color: #ef9a9a; }
+    .mix-200 { background: #1a2f44; color: #7aa2f0; }
+    .mix-100 { background: #1b3a1e; color: #81c784; }
+
+    .gift-recipients { color: #7a7e98; }
+    .strategy-body .col-price { color: #9098b0; }
 }
