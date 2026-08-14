@@ -1,0 +1,13 @@
+# Visual Studio 本地工作区文件
+.vs/
+
+# Claude 本地设置
+.claude/
+
+# 依赖与日志
+node_modules/
+*.log
+
+# 系统文件
+Thumbs.db
+Desktop.ini
